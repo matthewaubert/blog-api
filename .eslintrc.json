@@ -1,0 +1,35 @@
+{
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": ["airbnb-base", "prettier"],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "consistent-return": "off",
+        "func-names": "off",
+        "import/newline-after-import": "off",
+        "import/order": "off",
+        "no-console": "off",
+        "no-else-return": ["error", {
+            "allowElseIf": true
+        }],
+        "no-param-reassign": ["error", {
+            "props": false
+        }],
+        "no-plusplus": "off",
+        "no-underscore-dangle": "off",
+        "no-unused-expressions": ["error", {
+            "allowTernary": true
+        }],
+        "no-unused-vars": ["error", { "args": "none" }],
+        "no-use-before-define": ["error", {
+            "functions": false,
+            "classes": false
+        }],
+        "prefer-template": "off"
+    }
+}
