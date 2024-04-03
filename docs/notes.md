@@ -25,3 +25,38 @@ Posts should probably have a title, but should comments?
 
 To do:
 - [x] [Create a new Express app](https://gist.github.com/matthewaubert/c7b652d2c25be2b09cc9c82316d9652c)
+
+## 4/3/24
+
+To do:
+- [x] Design my back end models and schemas
+  - User
+    - first name: string
+    - last name: string
+    - username: string
+    - slug: string
+    - email: string
+    - password: string
+    - isAuthor: boolean (false by default) - must confirm email
+    - isAdmin: boolean (false by default) - only me
+  - Post - must be an author to create, update, delete own posts; admin to update, delete any posts
+    - title: string
+    - slug: string
+    - text: string
+    - createdAt: Date (use Mongoose [`timestamps: true`](https://mongoosejs.com/docs/timestamps.html) option)
+    - updatedAt: Date (use Mongoose `timestamps: true` option)
+    - user: ObjectId (references User)
+    - isPublished: boolean (false by default)
+    - category: ObjectId (references Category)
+    - tags: array of strings
+    - imgId: string
+  - Comment - must be a User to comment; author to update, delete comments on own post; admin to update, delete comments on any post
+    - text: string
+    - createdAt: Date (use Mongoose `timestamps: true` option)
+    - updatedAt: Date (use Mongoose `timestamps: true` option)
+    - user: ObjectId (references User)
+    - post: ObjectId (references Post)
+  - Category
+    - name: string
+    - slug: string
+- [x] Define models in Mongoose
