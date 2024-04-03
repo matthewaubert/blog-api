@@ -60,3 +60,4 @@ To do:
     - name: string
     - slug: string
 - [x] Define models in Mongoose
+- [x] Write func to generate unique slugs
