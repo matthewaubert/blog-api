@@ -73,10 +73,10 @@ To do:
   - [ ] User controllers
     - [x] GET one
     - [x] GET all
-    - [ ] POST
+    - [x] POST
       - [x] Write basic controller
       - [x] Validate and sanitize
-      - [ ] Generate hashed password w/ bcrypt
+      - [x] Hash password w/ bcrypt
     - [ ] PUT
     - [ ] DELETE
   - [ ] Post controllers

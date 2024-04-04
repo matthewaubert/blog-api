@@ -4,6 +4,7 @@ const createError = require('http-errors'); // https://www.npmjs.com/package/htt
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
+const bcrypt = require('bcryptjs'); // https://www.npmjs.com/package/bcryptjs
 const { slugify } = require('../utils/util');
 
 // GET all Users
@@ -77,38 +78,41 @@ exports.post = [
     // check that password confirmation matches password
     .custom((value, { req }) => value === req.body.password),
 
-  asyncHandler(async (req, res) => {
-    console.log('req.body:', req.body);
+  asyncHandler(async (req, res, next) => {
     // extract validation errors from request
     const errors = validationResult(req);
 
-    // generate hashed password w/ bcrypt
+    // hash password w/ bcrypt
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      // if err, skip to next in middleware chain
+      if (err) return next(err);
 
-    // create a User object w/ escaped & trimmed data
-    const user = new User({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      username: req.body.username,
-      slug: await slugify(req.body.username, 'user'),
-      email: req.body.email,
-      password: req.body.password, // need to hash this
+      // create a User object w/ escaped & trimmed data
+      const user = new User({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        username: req.body.username,
+        slug: await slugify(req.body.username, 'user'),
+        email: req.body.email,
+        password: hashedPassword,
+      });
+
+      // if validation errors: send User and errors back as JSON
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          message: `${res.statusCode} Bad Request`,
+          errors: errors.array(),
+          data: user,
+        });
+      } else {
+        // data from form is valid. Save User and send back as JSON.
+        await user.save();
+        res.json({
+          message: `User ${user.username} saved to database`,
+          data: user,
+        });
+      }
     });
-
-    // if errors: send User and errors back as JSON
-    if (!errors.isEmpty()) {
-      res.status(400).json({
-        message: `${res.statusCode} Bad Request`,
-        errors: errors.array(),
-        data: user,
-      });
-    } else {
-      // data from form is valid. Save User and send back as JSON.
-      await user.save();
-      res.json({
-        message: `User ${user.username} saved to database`,
-        data: user,
-      });
-    }
   }),
 ];
 
