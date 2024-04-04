@@ -74,6 +74,9 @@ To do:
     - [x] GET one
     - [x] GET all
     - [ ] POST
+      - [x] Write basic controller
+      - [x] Validate and sanitize
+      - [ ] Generate hashed password w/ bcrypt
     - [ ] PUT
     - [ ] DELETE
   - [ ] Post controllers

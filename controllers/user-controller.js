@@ -2,6 +2,8 @@ const User = require('../models/user');
 const { isValidObjectId } = require('mongoose');
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
+const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
+const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
 
 // GET all Users
@@ -39,12 +41,48 @@ exports.getOne = asyncHandler(async (req, res, next) => {
 // POST (create) a new User
 exports.post = [
   // validate and sanitize User fields
+  body('firstName', 'First name must not be empty.')
+    .trim()
+    .isLength({ min: 1 })
+    .customSanitizer((value) => encode(value)),
+  body('lastName', 'Last name must not be empty.')
+    .trim()
+    .isLength({ min: 1 })
+    .customSanitizer((value) => encode(value)),
+  body('username')
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage('Username must not be empty')
+    // check that username isn't already being used
+    .custom(async (value) => {
+      const user = await User.findOne({ username: value });
+      if (user) throw new Error('Username already in use.');
+    })
+    .customSanitizer((value) => encode(value)),
+  body('email')
+    .trim()
+    .isLength({ min: 6 })
+    .withMessage('Email must be at least 6 characters.')
+    // check that email isn't already being used
+    .custom(async (value) => {
+      const user = await User.findOne({ email: value });
+      if (user) throw new Error('Email already in use.');
+    })
+    .customSanitizer((value) => encode(value)),
+  body('password', 'Password must be at least 8 characters.')
+    .trim()
+    .isLength({ min: 8 }),
+  body('confirmPassword', 'Password confirmation must match password.')
+    .trim()
+    // check that password confirmation matches password
+    .custom((value, { req }) => value === req.body.password),
 
   asyncHandler(async (req, res) => {
     console.log('req.body:', req.body);
     // extract validation errors from request
+    const errors = validationResult(req);
 
-    // generate encrypted password w/ bcrypt
+    // generate hashed password w/ bcrypt
 
     // create a User object w/ escaped & trimmed data
     const user = new User({
@@ -56,11 +94,21 @@ exports.post = [
       password: req.body.password, // need to hash this
     });
 
-    // if errors: send user and errors back as JSON?
-
-    // data from form is valid. Save User and send back as JSON.
-    await user.save();
-    res.json(user);
+    // if errors: send User and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: user,
+      });
+    } else {
+      // data from form is valid. Save User and send back as JSON.
+      await user.save();
+      res.json({
+        message: `User ${user.username} saved to database`,
+        data: user,
+      });
+    }
   }),
 ];
 
