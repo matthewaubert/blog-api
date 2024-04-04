@@ -61,3 +61,40 @@ To do:
     - slug: string
 - [x] Define models in Mongoose
 - [x] Write func to generate unique slugs
+
+## 4/4/24
+
+To do:
+- [x] Set up routes and controller skeletons
+  - [x] Review previous lessons
+  - [x] Set up routes
+  - [x] Set up controller skeletons
+- [ ] Implement controllers
+  - [ ] User controllers
+    - [ ] GET one
+    - [ ] GET all
+    - [ ] POST
+    - [ ] PUT
+    - [ ] DELETE
+  - [ ] Post controllers
+    - [ ] GET one
+    - [ ] GET all
+    - [ ] POST
+    - [ ] PUT
+    - [ ] DELETE
+  - [ ] Comment controllers
+    - [ ] GET one
+    - [ ] GET all
+    - [ ] POST
+    - [ ] PUT
+    - [ ] DELETE
+  - [ ] Category controllers
+    - [ ] GET one
+    - [ ] GET all
+    - [ ] POST
+    - [ ] PUT
+    - [ ] DELETE
+- Limit results?
+- Sort results?
+- Filter results?
+- Implement user authentication using JWT
