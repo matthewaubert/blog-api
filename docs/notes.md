@@ -71,8 +71,8 @@ To do:
   - [x] Set up controller skeletons
 - [ ] Implement controllers
   - [ ] User controllers
-    - [ ] GET one
-    - [ ] GET all
+    - [x] GET one
+    - [x] GET all
     - [ ] POST
     - [ ] PUT
     - [ ] DELETE

@@ -1,19 +1,40 @@
 const User = require('../models/user');
-const asyncHandler = require('express-async-handler');
+const { isValidObjectId } = require('mongoose');
+const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
+const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { slugify } = require('../utils/util');
 
 // GET all Users
-exports.getAll = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET all Users' });
-};
+exports.getAll = asyncHandler(async (req, res) => {
+  // get all Users
+  const allUsers = await User.find().sort({ email: 1 }).exec();
+
+  res.json({
+    message: 'All users fetched from database',
+    data: allUsers,
+  });
+});
 
 // limit results?
 // sort results?
 
 // GET a single User
-exports.getOne = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET a single User' });
-};
+exports.getOne = asyncHandler(async (req, res, next) => {
+  // if invalid User id given: throw error
+  if (!isValidObjectId(req.params.id))
+    return next(createError(404, `Invalid user id: ${req.params.id}`));
+
+  // get User w/ `id` that matches `req.params.id`
+  const user = await User.findById(req.params.id).exec();
+
+  // if User not found: throw error
+  if (!user) return next(createError(404, 'User not found'));
+
+  res.json({
+    message: `User ${user.username} fetched from database`,
+    data: user,
+  });
+});
 
 // POST (create) a new User
 exports.post = [
