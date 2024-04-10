@@ -25,7 +25,7 @@ router.get('/users/:id', userController.getOne);
 // POST (create) a new User
 router.post('/users', userController.post);
 
-// PUT (update) a User
+// PUT (fully replace) a User
 router.put('/users/:id', userController.put);
 
 // DELETE a User

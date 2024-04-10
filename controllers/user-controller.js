@@ -39,8 +39,8 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   });
 });
 
-// POST (create) a new User
-exports.post = [
+// validation & sanitization chain for User POST & PUT
+const validationChainPostPut = [
   // validate and sanitize User fields
   body('firstName', 'First name must not be empty.')
     .trim()
@@ -56,7 +56,7 @@ exports.post = [
     .withMessage('Username must not be empty')
     // check that username isn't already being used
     .custom(async (value) => {
-      const user = await User.findOne({ username: value });
+      const user = await User.findOne({ username: value }).exec();
       if (user) throw new Error('Username already in use.');
     })
     .customSanitizer((value) => encode(value)),
@@ -66,7 +66,7 @@ exports.post = [
     .withMessage('Email must be at least 6 characters.')
     // check that email isn't already being used
     .custom(async (value) => {
-      const user = await User.findOne({ email: value });
+      const user = await User.findOne({ email: value }).exec();
       if (user) throw new Error('Email already in use.');
     })
     .customSanitizer((value) => encode(value)),
@@ -77,6 +77,20 @@ exports.post = [
     .trim()
     // check that password confirmation matches password
     .custom((value, { req }) => value === req.body.password),
+];
+
+// POST (create) a new User
+exports.post = [
+  asyncHandler(async (req, res, next) => {
+    // if invalid User id given: throw error
+    if (!isValidObjectId(req.params.id))
+      return next(createError(404, `Invalid user id: ${req.params.id}`));
+
+    return next();
+  }),
+
+  // validate and sanitize User fields
+  ...validationChainPostPut,
 
   asyncHandler(async (req, res, next) => {
     // extract validation errors from request
@@ -116,10 +130,58 @@ exports.post = [
   }),
 ];
 
-// PUT (update) a User
-exports.put = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PUT (update) a User' });
-};
+// PUT (fully replace) a User
+exports.put = [
+  // validate and sanitize User fields
+  ...validationChainPostPut,
+  // validate old password matches one in database
+  body('oldPassword', 'Incorrect old password')
+    .trim()
+    // check that `oldPassword` matches password in database
+    .custom(async (value, { req }) => {
+      const user = await User.findById(req.params.id).exec();
+      const matches = user ? await bcrypt.compare(value, user.password) : false;
+      if (!matches) throw new Error('Incorrect old password');
+    }),
+
+  asyncHandler(async (req, res, next) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    // hash password w/ bcrypt
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      // if err, skip to next in middleware chain
+      if (err) return next(err);
+
+      // create a User object w/ escaped & trimmed data
+      const user = new User({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        username: req.body.username,
+        slug: await slugify(req.body.username, 'user'),
+        email: req.body.email,
+        password: hashedPassword,
+        _id: req.params.id, // this is required, or a new ID will be assigned!
+      });
+
+      // if validation errors: send User and errors back as JSON
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          message: `${res.statusCode} Bad Request`,
+          errors: errors.array(),
+          data: user,
+        });
+      } else {
+        // data from form is valid. Save User and send back as JSON.
+        await User.findByIdAndUpdate(req.params.id, user);
+        res.json({
+          message: `User ${user.username} replaced in database`,
+          data: user,
+        });
+      }
+    });
+  }),
+];
 
 // DELETE a User
 exports.delete = (req, res) => {
