@@ -28,6 +28,9 @@ router.post('/users', userController.post);
 // PUT (fully replace) a User
 router.put('/users/:id', userController.put);
 
+// PATCH (partially update) a User
+router.patch('/users/:id', userController.patch);
+
 // DELETE a User
 router.delete('/users/:id', userController.delete);
 
