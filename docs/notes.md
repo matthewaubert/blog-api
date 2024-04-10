@@ -69,16 +69,17 @@ To do:
   - [x] Review previous lessons
   - [x] Set up routes
   - [x] Set up controller skeletons
-- [ ] Implement controllers
-  - [ ] User controllers
+- [x] Implement controllers
+  - [x] User controllers
     - [x] GET one
     - [x] GET all
     - [x] POST
       - [x] Write basic controller
       - [x] Validate and sanitize
       - [x] Hash password w/ bcrypt
-    - [ ] PUT
-    - [ ] DELETE
+    - [x] PUT
+    - [x] PATCH
+    - [x] DELETE
   - [ ] Post controllers
     - [ ] GET one
     - [ ] GET all

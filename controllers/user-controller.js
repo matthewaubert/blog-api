@@ -285,6 +285,19 @@ exports.patch = [
 ];
 
 // DELETE a User
-exports.delete = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: DELETE a User' });
-};
+exports.delete = asyncHandler(async (req, res, next) => {
+  // if invalid User id given: throw error
+  if (!isValidObjectId(req.params.id))
+    return next(createError(404, `Invalid user id: ${req.params.id}`));
+
+  // get User w/ `_id` that matches `req.params.id`
+  const user = await User.findByIdAndDelete(req.params.id).exec();
+
+  // if User not found: throw error
+  if (!user) return next(createError(404, 'User not found'));
+
+  res.json({
+    message: `User ${user.username} deleted from database`,
+    data: user,
+  });
+});
