@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator'); // https://expr
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const bcrypt = require('bcryptjs'); // https://www.npmjs.com/package/bcryptjs
 const { slugify } = require('../utils/util');
+const { validateIdParam } = require('../utils/middleware');
 
 // GET all Users
 exports.getAll = asyncHandler(async (req, res) => {
@@ -35,7 +36,7 @@ exports.getAll = asyncHandler(async (req, res) => {
 exports.getOne = asyncHandler(async (req, res, next) => {
   // if invalid User id given: throw error
   if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid user id: ${req.params.id}`));
+    return next(createError(404, `Invalid id: ${req.params.id}`));
 
   // get User w/ `id` that matches `req.params.id`
   const user = await User.findById(req.params.id).exec();
@@ -133,13 +134,7 @@ exports.post = [
 
 // PUT (fully replace) a User
 exports.put = [
-  asyncHandler(async (req, res, next) => {
-    // if invalid User id given: throw error
-    if (!isValidObjectId(req.params.id))
-      return next(createError(404, `Invalid user id: ${req.params.id}`));
-
-    return next();
-  }),
+  validateIdParam, // throw error if invalid id param given
 
   // validate and sanitize User fields
   ...validationChainPostPut,
@@ -194,13 +189,7 @@ exports.put = [
 
 // PATCH (partially update) a User
 exports.patch = [
-  asyncHandler(async (req, res, next) => {
-    // if invalid User id given: throw error
-    if (!isValidObjectId(req.params.id))
-      return next(createError(404, `Invalid user id: ${req.params.id}`));
-
-    return next();
-  }),
+  validateIdParam, // throw error if invalid id param given
 
   // validate and sanitize User fields
   body('firstName')
@@ -297,7 +286,7 @@ exports.patch = [
 exports.delete = asyncHandler(async (req, res, next) => {
   // if invalid User id given: throw error
   if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid user id: ${req.params.id}`));
+    return next(createError(404, `Invalid id: ${req.params.id}`));
 
   // get User w/ `_id` that matches `req.params.id`
   const user = await User.findByIdAndDelete(req.params.id).exec();

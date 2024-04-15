@@ -5,6 +5,7 @@ const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
+const { validateIdParam } = require('../utils/middleware');
 
 // GET all Categories
 exports.getAll = asyncHandler(async (req, res) => {
@@ -34,7 +35,7 @@ exports.getAll = asyncHandler(async (req, res) => {
 exports.getOne = asyncHandler(async (req, res, next) => {
   // if invalid Category id given: throw error
   if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid category id: ${req.params.id}`));
+    return next(createError(404, `Invalid id: ${req.params.id}`));
 
   // get Category w/ `id` that matches `req.params.id`
   const category = await Category.findById(req.params.id).exec();
