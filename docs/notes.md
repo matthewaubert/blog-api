@@ -88,6 +88,13 @@ To do:
   - [x] Limit results
   - [x] Offset results
   - [x] Count results
+- [ ] Category controllers
+  - [ ] GET one
+  - [ ] GET all
+  - [x] POST
+  - [ ] PUT
+  - [ ] PATCH
+  - [ ] DELETE
 - [ ] Post controllers
   - [ ] GET one
   - [ ] GET all
@@ -96,13 +103,6 @@ To do:
   - [ ] PATCH
   - [ ] DELETE
 - [ ] Comment controllers
-  - [ ] GET one
-  - [ ] GET all
-  - [ ] POST
-  - [ ] PUT
-  - [ ] PATCH
-  - [ ] DELETE
-- [ ] Category controllers
   - [ ] GET one
   - [ ] GET all
   - [ ] POST

@@ -51,7 +51,6 @@ exports.getOne = asyncHandler(async (req, res, next) => {
 
 // validation & sanitization chain for User POST & PUT
 const validationChainPostPut = [
-  // validate and sanitize User fields
   body('firstName', 'First name must not be empty.')
     .trim()
     .isLength({ min: 1 })
