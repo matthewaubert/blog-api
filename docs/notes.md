@@ -83,11 +83,11 @@ To do:
 ## 4/15/24
 
 To do:
-- [ ] User GET controller
+- [x] User GET controller
   - [x] Sort results
   - [x] Limit results
   - [x] Offset results
-  - [ ] Count results
+  - [x] Count results
 - [ ] Post controllers
   - [ ] GET one
   - [ ] GET all
