@@ -81,14 +81,6 @@ const validationChainPostPut = [
 
 // POST (create) a new User
 exports.post = [
-  asyncHandler(async (req, res, next) => {
-    // if invalid User id given: throw error
-    if (!isValidObjectId(req.params.id))
-      return next(createError(404, `Invalid user id: ${req.params.id}`));
-
-    return next();
-  }),
-
   // validate and sanitize User fields
   ...validationChainPostPut,
 
@@ -132,6 +124,14 @@ exports.post = [
 
 // PUT (fully replace) a User
 exports.put = [
+  asyncHandler(async (req, res, next) => {
+    // if invalid User id given: throw error
+    if (!isValidObjectId(req.params.id))
+      return next(createError(404, `Invalid user id: ${req.params.id}`));
+
+    return next();
+  }),
+
   // validate and sanitize User fields
   ...validationChainPostPut,
   // validate old password matches one in database
