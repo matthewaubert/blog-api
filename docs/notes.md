@@ -90,7 +90,7 @@ To do:
   - [x] Count results
 - [ ] Category controllers
   - [ ] GET one
-  - [ ] GET all
+  - [x] GET all
   - [x] POST
   - [ ] PUT
   - [ ] PATCH

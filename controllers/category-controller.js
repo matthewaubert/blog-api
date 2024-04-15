@@ -5,12 +5,28 @@ const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
 
 // GET all Categories
-exports.getAll = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET all Categories' });
-};
+exports.getAll = asyncHandler(async (req, res) => {
+  // if client sorts by `id`, replace property name with `_id` to work with MongoDB
+  if (req.query.sort && Object.keys(req.query.sort).includes('id')) {
+    req.query.sort._id = req.query.sort.id;
+    delete req.query.sort.id;
+  }
+  // console.log(req.query);
 
-// limit results?
-// sort results?
+  // get all Categories
+  const allCategories = await Category.find()
+    // default sort by `_id` asc
+    .sort(req.query.sort ? req.query.sort : { _id: 'asc' })
+    .skip(req.query.offset)
+    .limit(req.query.limit)
+    .exec();
+
+  res.json({
+    message: 'Categories fetched from database',
+    count: allCategories.length,
+    data: allCategories,
+  });
+});
 
 // GET a single Category
 exports.getOne = (req, res) => {
