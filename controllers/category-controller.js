@@ -1,4 +1,6 @@
 const Category = require('../models/category');
+const { isValidObjectId } = require('mongoose');
+const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
@@ -29,9 +31,22 @@ exports.getAll = asyncHandler(async (req, res) => {
 });
 
 // GET a single Category
-exports.getOne = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET a single Category' });
-};
+exports.getOne = asyncHandler(async (req, res, next) => {
+  // if invalid Category id given: throw error
+  if (!isValidObjectId(req.params.id))
+    return next(createError(404, `Invalid category id: ${req.params.id}`));
+
+  // get Category w/ `id` that matches `req.params.id`
+  const category = await Category.findById(req.params.id).exec();
+
+  // if Category not found: throw error
+  if (!category) return next(createError(404, 'Category not found'));
+
+  res.json({
+    message: `Category ${category.name} fetched from database`,
+    data: category,
+  });
+});
 
 // validation & sanitization chain for Category POST & PUT
 const validationChainPostPut = [
