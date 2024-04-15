@@ -102,10 +102,42 @@ exports.post = [
   }),
 ];
 
-// PUT (update) a Category
-exports.put = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PUT (update) a Category' });
-};
+// PUT (fully replace) a Category
+exports.put = [
+  validateIdParam, // throw error if invalid id param given
+
+  // validate and sanitize Category fields
+  ...validationChainPostPut,
+
+  asyncHandler(async (req, res, next) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    // create a Category object w/ escaped & trimmed data
+    const category = new Category({
+      name: req.body.name,
+      slug: await slugify(req.body.name, 'category', req.params.id),
+      description: req.body.description,
+      _id: req.params.id, // this is required, or a new ID will be assigned!
+    });
+
+    // if validation errors: send Category and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: category,
+      });
+    } else {
+      // data from form is valid. Save Category and send back as JSON.
+      await Category.findOneAndReplace({ _id: req.params.id }, category);
+      res.json({
+        message: `Category ${category.name} replaced in database`,
+        data: category,
+      });
+    }
+  }),
+];
 
 // DELETE a Category
 exports.delete = (req, res) => {

@@ -179,7 +179,7 @@ exports.put = [
         });
       } else {
         // data from form is valid. Save User and send back as JSON.
-        await User.findByIdAndUpdate(req.params.id, user);
+        await User.findOneAndReplace({ _id: req.params.id }, user);
         res.json({
           message: `User ${user.username} replaced in database`,
           data: user,
