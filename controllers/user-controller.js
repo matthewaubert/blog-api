@@ -9,17 +9,26 @@ const { slugify } = require('../utils/util');
 
 // GET all Users
 exports.getAll = asyncHandler(async (req, res) => {
+  // if client sorts by `id`, replace property name with `_id` to work with MongoDB
+  if (req.query.sort && Object.keys(req.query.sort).includes('id')) {
+    req.query.sort._id = req.query.sort.id;
+    delete req.query.sort.id;
+  }
+  // console.log(req.query);
+
   // get all Users
-  const allUsers = await User.find().sort({ email: 1 }).exec();
+  const allUsers = await User.find()
+    // default sort by `_id` asc
+    .sort(req.query.sort ? req.query.sort : { _id: 'asc' })
+    .skip(req.query.offset)
+    .limit(req.query.limit)
+    .exec();
 
   res.json({
-    message: 'All users fetched from database',
+    message: 'Users fetched from database',
     data: allUsers,
   });
 });
-
-// limit results?
-// sort results?
 
 // GET a single User
 exports.getOne = asyncHandler(async (req, res, next) => {

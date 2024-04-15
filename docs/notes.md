@@ -69,36 +69,44 @@ To do:
   - [x] Review previous lessons
   - [x] Set up routes
   - [x] Set up controller skeletons
-- [x] Implement controllers
-  - [x] User controllers
-    - [x] GET one
-    - [x] GET all
-    - [x] POST
-      - [x] Write basic controller
-      - [x] Validate and sanitize
-      - [x] Hash password w/ bcrypt
-    - [x] PUT
-    - [x] PATCH
-    - [x] DELETE
-  - [ ] Post controllers
-    - [ ] GET one
-    - [ ] GET all
-    - [ ] POST
-    - [ ] PUT
-    - [ ] DELETE
-  - [ ] Comment controllers
-    - [ ] GET one
-    - [ ] GET all
-    - [ ] POST
-    - [ ] PUT
-    - [ ] DELETE
-  - [ ] Category controllers
-    - [ ] GET one
-    - [ ] GET all
-    - [ ] POST
-    - [ ] PUT
-    - [ ] DELETE
-- Limit results?
-- Sort results?
-- Filter results?
+- [x] User controllers
+  - [x] GET one
+  - [x] GET all
+  - [x] POST
+    - [x] Write basic controller
+    - [x] Validate and sanitize
+    - [x] Hash password w/ bcrypt
+  - [x] PUT
+  - [x] PATCH
+  - [x] DELETE
+
+## 4/15/24
+
+To do:
+- [ ] User GET controller
+  - [x] Sort results
+  - [x] Limit results
+  - [x] Offset results
+  - [ ] Count results
+- [ ] Post controllers
+  - [ ] GET one
+  - [ ] GET all
+  - [ ] POST
+  - [ ] PUT
+  - [ ] PATCH
+  - [ ] DELETE
+- [ ] Comment controllers
+  - [ ] GET one
+  - [ ] GET all
+  - [ ] POST
+  - [ ] PUT
+  - [ ] PATCH
+  - [ ] DELETE
+- [ ] Category controllers
+  - [ ] GET one
+  - [ ] GET all
+  - [ ] POST
+  - [ ] PUT
+  - [ ] PATCH
+  - [ ] DELETE
 - Implement user authentication using JWT
