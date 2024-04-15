@@ -65,9 +65,10 @@ const validationChainPostPut = [
     .isLength({ min: 1 })
     .withMessage('Username must not be empty')
     // check that username isn't already being used
-    .custom(async (value) => {
+    .custom(async (value, { req }) => {
       const user = await User.findOne({ username: value }).exec();
-      if (user) throw new Error('Username already in use.');
+      if (user && user.id !== req.params.id)
+        throw new Error('Username already in use.');
     })
     .customSanitizer((value) => encode(value)),
   body('email')
@@ -75,9 +76,10 @@ const validationChainPostPut = [
     .isLength({ min: 6 })
     .withMessage('Email must be at least 6 characters.')
     // check that email isn't already being used
-    .custom(async (value) => {
+    .custom(async (value, { req }) => {
       const user = await User.findOne({ email: value }).exec();
-      if (user) throw new Error('Email already in use.');
+      if (user && user.id !== req.params.id)
+        throw new Error('Email already in use.');
     })
     .customSanitizer((value) => encode(value)),
   body('password', 'Password must be at least 8 characters.')
@@ -162,7 +164,7 @@ exports.put = [
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         username: req.body.username,
-        slug: await slugify(req.body.username, 'user'),
+        slug: await slugify(req.body.username, 'user', req.params.id),
         email: req.body.email,
         password: hashedPassword,
         _id: req.params.id, // this is required, or a new ID will be assigned!
@@ -201,9 +203,10 @@ exports.patch = [
   body('username')
     .trim()
     // check that username isn't already being used
-    .custom(async (value) => {
+    .custom(async (value, { req }) => {
       const user = await User.findOne({ username: value }).exec();
-      if (user) throw new Error('Username already in use.');
+      if (user && user.id !== req.params.id)
+        throw new Error('Username already in use.');
     })
     .customSanitizer((value) => encode(value)),
   body('email')
@@ -211,9 +214,10 @@ exports.patch = [
     // check that email, if exists, is at least 6 chars
     .custom((value) => value.length === 0 || value.length >= 6)
     // check that email isn't already being used
-    .custom(async (value) => {
+    .custom(async (value, { req }) => {
       const user = await User.findOne({ email: value }).exec();
-      if (user) throw new Error('Email already in use.');
+      if (user && user.id !== req.params.id)
+        throw new Error('Email already in use.');
     })
     .customSanitizer((value) => encode(value)),
   body('password').trim(),
@@ -247,7 +251,11 @@ exports.patch = [
             // if updating username, update slug as well
             case 'username':
               userFields.username = req.body.username;
-              userFields.slug = await slugify(req.body.username, 'user');
+              userFields.slug = await slugify(
+                req.body.username,
+                'user',
+                req.params.id,
+              );
               break;
             // if updating password, use hash
             case 'password':

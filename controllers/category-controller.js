@@ -56,9 +56,10 @@ const validationChainPostPut = [
     .isLength({ min: 1 })
     .withMessage('Name must not be empty.')
     // check that category name isn't already being used
-    .custom(async (value) => {
+    .custom(async (value, { req }) => {
       const category = await Category.findOne({ name: value }).exec();
-      if (category) throw Error('Category name already exists.');
+      if (category && category.id !== req.params.id)
+        throw Error('Category name already exists.');
     })
     .customSanitizer((value) => encode(value)),
   body('description')
