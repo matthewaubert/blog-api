@@ -3,9 +3,6 @@ exports.getAll = (req, res) => {
   res.json({ message: 'NOT IMPLEMENTED: GET all Comments' });
 };
 
-// limit results?
-// sort results?
-
 // GET a single Comment
 exports.getOne = (req, res) => {
   res.json({ message: 'NOT IMPLEMENTED: GET a single Comment' });
@@ -16,9 +13,14 @@ exports.post = (req, res) => {
   res.json({ message: 'NOT IMPLEMENTED: POST (create) a new Comment' });
 };
 
-// PUT (update) a Comment
+// PUT (fully replace) a Comment
 exports.put = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PUT (update) a Comment' });
+  res.json({ message: 'NOT IMPLEMENTED: PUT (fully replace) a Comment' });
+};
+
+// PATCH (partially update) a Comment
+exports.patch = (req, res) => {
+  res.json({ message: 'NOT IMPLEMENTED: PATCH (partially update) a Comment' });
 };
 
 // DELETE a Comment

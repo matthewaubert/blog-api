@@ -16,9 +16,6 @@ router.get('/', (req, res) => {
 // GET all Users
 router.get('/users', userController.getAll);
 
-// limit results?
-// sort results?
-
 // GET a single User
 router.get('/users/:id', userController.getOne);
 
@@ -39,17 +36,17 @@ router.delete('/users/:id', userController.delete);
 // GET all Posts
 router.get('/posts', postController.getAll);
 
-// limit results?
-// sort results?
-
 // GET a single Post
 router.get('/posts/:id', postController.getOne);
 
 // POST (create) a new Post
 router.post('/posts', postController.post);
 
-// PUT (update) a Post
+// PUT (fully replace) a Post
 router.put('/posts/:id', postController.put);
+
+// PATCH (partially update) a Post
+router.patch('/posts/:id', postController.patch);
 
 // DELETE a Post
 router.delete('/posts/:id', postController.delete);
@@ -59,17 +56,17 @@ router.delete('/posts/:id', postController.delete);
 // GET all Comments
 router.get('/comments', commentController.getAll);
 
-// limit results?
-// sort results?
-
 // GET a single Comment
 router.get('/comments/:id', commentController.getOne);
 
 // POST (create) a new Comment
 router.post('/comments', commentController.post);
 
-// PUT (update) a Comment
+// PUT (fully replace) a Comment
 router.put('/comments/:id', commentController.put);
+
+// PATCH (partially update) a Comment
+router.patch('/comments/:id', commentController.patch);
 
 // DELETE a Comment
 router.delete('/comments/:id', commentController.delete);
@@ -79,16 +76,13 @@ router.delete('/comments/:id', commentController.delete);
 // GET all Categories
 router.get('/categories', categoryController.getAll);
 
-// limit results?
-// sort results?
-
 // GET a single Category
 router.get('/categories/:id', categoryController.getOne);
 
 // POST (create) a new Category
 router.post('/categories', categoryController.post);
 
-// PUT (update) a Category
+// PUT (fully replace) a Category
 router.put('/categories/:id', categoryController.put);
 
 // PATCH (partially update) a Category
