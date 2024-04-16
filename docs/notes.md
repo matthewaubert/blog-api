@@ -88,17 +88,21 @@ To do:
   - [x] Limit results
   - [x] Offset results
   - [x] Count results
-- [ ] Category controllers
-  - [ ] GET one
+- [x] Category controllers
+  - [x] GET one
   - [x] GET all
   - [x] POST
   - [x] PUT
   - [x] PATCH
-  - [ ] DELETE
+  - [x] DELETE
+
+## 4/16/24
+
+To do:
 - [ ] Post controllers
   - [ ] GET one
   - [ ] GET all
-  - [ ] POST
+  - [x] POST
   - [ ] PUT
   - [ ] PATCH
   - [ ] DELETE
@@ -109,4 +113,6 @@ To do:
   - [ ] PUT
   - [ ] PATCH
   - [ ] DELETE
-- Implement user authentication using JWT
+- [ ] Turn off document versioning?
+- [ ] Start writing documentation
+- [ ] Implement user authentication using JWT
