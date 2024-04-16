@@ -45,7 +45,7 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   if (!user) return next(createError(404, 'User not found'));
 
   res.json({
-    message: `User ${user.username} fetched from database`,
+    message: `User '${user.username}' fetched from database`,
     data: user,
   });
 });
@@ -75,6 +75,8 @@ const validationChainPostPut = [
     .trim()
     .isLength({ min: 6 })
     .withMessage('Email must be at least 6 characters.')
+    .isEmail()
+    .withMessage('Must be a valid email address.')
     // check that email isn't already being used
     .custom(async (value, { req }) => {
       const user = await User.findOne({ email: value }).exec();
@@ -126,7 +128,7 @@ exports.post = [
         // data from form is valid. Save User and send back as JSON.
         await user.save();
         res.json({
-          message: `User ${user.username} saved to database`,
+          message: `User '${user.username}' saved to database`,
           data: user,
         });
       }
@@ -181,7 +183,7 @@ exports.put = [
         // data from form is valid. Save User and send back as JSON.
         await User.findOneAndReplace({ _id: req.params.id }, user);
         res.json({
-          message: `User ${user.username} replaced in database`,
+          message: `User '${user.username}' replaced in database`,
           data: user,
         });
       }
@@ -215,8 +217,10 @@ exports.patch = [
   body('email')
     .optional()
     .trim()
-    // check that email, if exists, is at least 6 chars
-    .custom((value) => value.length === 0 || value.length >= 6)
+    .isLength({ min: 6 })
+    .withMessage('Email must be at least 6 characters.')
+    .isEmail()
+    .withMessage('Must be a valid email address.')
     // check that email isn't already being used
     .custom(async (value, { req }) => {
       const user = await User.findOne({ email: value }).exec();
@@ -287,7 +291,7 @@ exports.patch = [
         new: true,
       }).exec();
       res.json({
-        message: `User ${user.username} updated in database`,
+        message: `User '${user.username}' updated in database`,
         data: user,
       });
     }
@@ -307,7 +311,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!user) return next(createError(404, 'User not found'));
 
   res.json({
-    message: `User ${user.username} deleted from database`,
+    message: `User '${user.username}' deleted from database`,
     data: user,
   });
 });

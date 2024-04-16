@@ -44,7 +44,7 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   if (!category) return next(createError(404, 'Category not found'));
 
   res.json({
-    message: `Category ${category.name} fetched from database`,
+    message: `Category '${category.name}' fetched from database`,
     data: category,
   });
 });
@@ -73,7 +73,7 @@ exports.post = [
   // validate and sanitize Category fields
   ...validationChainPostPut,
 
-  asyncHandler(async (req, res, next) => {
+  asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
 
@@ -95,7 +95,7 @@ exports.post = [
       // data from form is valid. Save Category and send back as JSON.
       await category.save();
       res.json({
-        message: `Category ${category.name} saved to database`,
+        message: `Category '${category.name}' saved to database`,
         data: category,
       });
     }
@@ -109,7 +109,7 @@ exports.put = [
   // validate and sanitize Category fields
   ...validationChainPostPut,
 
-  asyncHandler(async (req, res, next) => {
+  asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
 
@@ -132,7 +132,7 @@ exports.put = [
       // data from form is valid. Save Category and send back as JSON.
       await Category.findOneAndReplace({ _id: req.params.id }, category);
       res.json({
-        message: `Category ${category.name} replaced in database`,
+        message: `Category '${category.name}' replaced in database`,
         data: category,
       });
     }
@@ -161,7 +161,7 @@ exports.patch = [
     .trim()
     .customSanitizer((value) => encode(value)),
 
-  asyncHandler(async (req, res, next) => {
+  asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
 
@@ -208,7 +208,7 @@ exports.patch = [
         { new: true },
       ).exec();
       res.json({
-        message: `Category ${category.name} updated in database`,
+        message: `Category '${category.name}' updated in database`,
         data: category,
       });
     }
@@ -228,7 +228,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!category) return next(createError(404, 'Category not found'));
 
   res.json({
-    message: `Category ${category.name} deleted from database`,
+    message: `Category '${category.name}' deleted from database`,
     data: category,
   });
 });
