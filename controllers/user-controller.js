@@ -195,12 +195,15 @@ exports.patch = [
 
   // validate and sanitize User fields
   body('firstName')
+    .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
   body('lastName')
+    .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
   body('username')
+    .optional()
     .trim()
     // check that username isn't already being used
     .custom(async (value, { req }) => {
@@ -210,6 +213,7 @@ exports.patch = [
     })
     .customSanitizer((value) => encode(value)),
   body('email')
+    .optional()
     .trim()
     // check that email, if exists, is at least 6 chars
     .custom((value) => value.length === 0 || value.length >= 6)
@@ -220,7 +224,7 @@ exports.patch = [
         throw new Error('Email already in use.');
     })
     .customSanitizer((value) => encode(value)),
-  body('password').trim(),
+  body('password').optional().trim(),
   body('confirmPassword', 'Password confirmation must match password.')
     .trim()
     // check that password confirmation matches password

@@ -92,8 +92,8 @@ To do:
   - [ ] GET one
   - [x] GET all
   - [x] POST
-  - [ ] PUT
-  - [ ] PATCH
+  - [x] PUT
+  - [x] PATCH
   - [ ] DELETE
 - [ ] Post controllers
   - [ ] GET one

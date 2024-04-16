@@ -91,6 +91,9 @@ router.post('/categories', categoryController.post);
 // PUT (update) a Category
 router.put('/categories/:id', categoryController.put);
 
+// PATCH (partially update) a Category
+router.patch('/categories/:id', categoryController.patch);
+
 // DELETE a Category
 router.delete('/categories/:id', categoryController.delete);
 

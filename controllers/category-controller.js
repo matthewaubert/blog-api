@@ -139,6 +139,82 @@ exports.put = [
   }),
 ];
 
+// PATCH (partially update) a Category
+exports.patch = [
+  validateIdParam, // throw error if invalid id param given
+
+  // validate and sanitize Category fields
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage('Name must not be empty.')
+    // check that category name isn't already being used
+    .custom(async (value, { req }) => {
+      const category = await Category.findOne({ name: value }).exec();
+      if (category && category.id !== req.params.id)
+        throw Error('Category name already exists.');
+    })
+    .customSanitizer((value) => encode(value)),
+  body('description')
+    .optional()
+    .trim()
+    .customSanitizer((value) => encode(value)),
+
+  asyncHandler(async (req, res, next) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    const categoryFields = {};
+    const categorySchemaPaths = Object.keys(Category.schema.paths);
+
+    // get category fields to update from body
+    await Promise.all(
+      // map each `req.body` key to a promise that resolves once the callback is finished
+      Object.keys(req.body).map(async (field) => {
+        // add field to categoryFields if non-empty and belongs to Category schema
+        if (req.body[field] && categorySchemaPaths.includes(field)) {
+          switch (field) {
+            // if updating name, update slug as well
+            case 'name':
+              categoryFields.name = req.body.name;
+              categoryFields.slug = await slugify(
+                req.body.name,
+                'category',
+                req.params.id,
+              );
+              break;
+            default:
+              categoryFields[field] = req.body[field];
+          }
+        }
+      }),
+    );
+
+    // console.log('categoryFields:', categoryFields);
+
+    // if validation errors: send categoryFields and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: categoryFields,
+      });
+    } else {
+      // data from form is valid. Save Category and send back as JSON.
+      const category = await Category.findByIdAndUpdate(
+        req.params.id,
+        categoryFields,
+        { new: true },
+      ).exec();
+      res.json({
+        message: `Category ${category.name} updated in database`,
+        data: category,
+      });
+    }
+  }),
+];
+
 // DELETE a Category
 exports.delete = (req, res) => {
   res.json({ message: 'NOT IMPLEMENTED: DELETE a Category' });
