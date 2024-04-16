@@ -216,6 +216,19 @@ exports.patch = [
 ];
 
 // DELETE a Category
-exports.delete = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: DELETE a Category' });
-};
+exports.delete = asyncHandler(async (req, res, next) => {
+  // if invalid Category id given: throw error
+  if (!isValidObjectId(req.params.id))
+    return next(createError(404, `Invalid id: ${req.params.id}`));
+
+  // get Category w/ `_id` that matches `req.params.id`
+  const category = await Category.findByIdAndDelete(req.params.id).exec();
+
+  // if Category not found: throw error
+  if (!category) return next(createError(404, 'Category not found'));
+
+  res.json({
+    message: `Category ${category.name} deleted from database`,
+    data: category,
+  });
+});
