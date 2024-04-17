@@ -150,8 +150,6 @@ exports.patch = [
   body('name')
     .optional()
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Name must not be empty.')
     // check that category name isn't already being used
     .custom(async (value, { req }) => {
       const category = await Category.findOne({ name: value }).exec();

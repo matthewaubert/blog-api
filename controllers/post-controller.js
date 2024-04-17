@@ -171,19 +171,116 @@ exports.put = [
       });
     } else {
       // data from form is valid. Save Post and send back as JSON.
-      await Post.findOneAndReplace({ _id: req.params.id }, post);
+      const updatedPost = await Post.findOneAndReplace(
+        { _id: req.params.id },
+        post,
+      );
       res.json({
-        message: `Post '${post.title}' replaced in database`,
-        data: post,
+        message: `Post '${updatedPost.title}' replaced in database`,
+        data: updatedPost,
       });
     }
   }),
 ];
 
 // PATCH (partially update) a Post
-exports.patch = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PATCH (partially update) a Post' });
-};
+exports.patch = [
+  validateIdParam, // throw error if invalid id param given
+
+  // validate and sanitize Post fields
+  body('title')
+    .optional()
+    .trim()
+    .customSanitizer((value) => encode(value)),
+  body('text')
+    .optional()
+    .trim()
+    .customSanitizer((value) => encode(value)),
+  // check that `user` is a valid user id
+  body('user')
+    .optional()
+    .trim()
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const user = isValid ? await User.findById(value).exec() : null;
+      if (!user) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid user id: ${value}`);
+    }),
+  body('isPublished', 'Must be true or false').optional().isBoolean(),
+  body('category')
+    .optional()
+    .trim()
+    // check that `category` is a valid category id
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const category = isValid ? await Category.findById(value).exec() : null;
+      if (!category) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid category id: ${value}`);
+    }),
+  body('tags')
+    .optional()
+    // check that `tags` is an array of strings
+    .isArray()
+    .customSanitizer((values) => values.map((value) => encode(value))),
+
+  asyncHandler(async (req, res) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    const postFields = {};
+    const postSchemaPaths = Object.keys(Post.schema.paths);
+    // console.log('postSchemaPaths', postSchemaPaths);
+
+    // get post fields to update from body
+    await Promise.all(
+      // map each `req.body` key to a promise that resolves once the callback is finished
+      Object.keys(req.body).map(async (field) => {
+        // add field to postFields if non-empty and belongs to Post schema
+        if (req.body[field] && postSchemaPaths.includes(field)) {
+          switch (field) {
+            // if updating title, update slug as well
+            case 'title':
+              postFields.title = req.body.title;
+              postFields.slug = await slugify(
+                req.body.title,
+                'post',
+                req.params.id,
+              );
+              break;
+            default:
+              postFields[field] = req.body[field];
+          }
+        }
+      }),
+    );
+
+    // console.log('postFields:', postFields);
+
+    // if validation errors: send postFields and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: postFields,
+      });
+    } else {
+      // data from form is valid. Save Post and send back as JSON.
+      const post = await Post.findByIdAndUpdate(req.params.id, postFields, {
+        new: true,
+      }).exec();
+      res.json({
+        message: `Post '${post.title}' updated in database`,
+        data: post,
+      });
+    }
+  }),
+];
 
 // DELETE a Post
 exports.delete = (req, res) => {
