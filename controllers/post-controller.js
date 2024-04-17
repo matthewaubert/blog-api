@@ -2,6 +2,7 @@ const Post = require('../models/post');
 const User = require('../models/user');
 const Category = require('../models/category');
 const { isValidObjectId } = require('mongoose');
+const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
@@ -34,9 +35,25 @@ exports.getAll = asyncHandler(async (req, res) => {
 });
 
 // GET a single Post
-exports.getOne = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET a single Post' });
-};
+exports.getOne = asyncHandler(async (req, res, next) => {
+  // if invalid id given: throw error
+  if (!isValidObjectId(req.params.id))
+    return next(createError(404, `Invalid id: ${req.params.id}`));
+
+  // get Post w/ `_id` that matches `req.params.id`
+  const post = await Post.findById(req.params.id)
+    .populate('user', 'firstName lastName username slug')
+    .populate('category')
+    .exec();
+
+  // if Post not found: throw error
+  if (!post) return next(createError(404, 'Post not found'));
+
+  res.json({
+    message: `Post '${post.title}' fetched from database`,
+    data: post,
+  });
+});
 
 // validation & sanitization chain for Post POST & PUT
 const validationChainPostPut = [

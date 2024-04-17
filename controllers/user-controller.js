@@ -34,11 +34,11 @@ exports.getAll = asyncHandler(async (req, res) => {
 
 // GET a single User
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // if invalid User id given: throw error
+  // if invalid id given: throw error
   if (!isValidObjectId(req.params.id))
     return next(createError(404, `Invalid id: ${req.params.id}`));
 
-  // get User w/ `id` that matches `req.params.id`
+  // get User w/ `_id` that matches `req.params.id`
   const user = await User.findById(req.params.id).exec();
 
   // if User not found: throw error
@@ -300,7 +300,7 @@ exports.patch = [
 
 // DELETE a User
 exports.delete = asyncHandler(async (req, res, next) => {
-  // if invalid User id given: throw error
+  // if invalid id given: throw error
   if (!isValidObjectId(req.params.id))
     return next(createError(404, `Invalid id: ${req.params.id}`));
 

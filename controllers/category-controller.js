@@ -33,11 +33,11 @@ exports.getAll = asyncHandler(async (req, res) => {
 
 // GET a single Category
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // if invalid Category id given: throw error
+  // if invalid id given: throw error
   if (!isValidObjectId(req.params.id))
     return next(createError(404, `Invalid id: ${req.params.id}`));
 
-  // get Category w/ `id` that matches `req.params.id`
+  // get Category w/ `_id` that matches `req.params.id`
   const category = await Category.findById(req.params.id).exec();
 
   // if Category not found: throw error
@@ -217,7 +217,7 @@ exports.patch = [
 
 // DELETE a Category
 exports.delete = asyncHandler(async (req, res, next) => {
-  // if invalid Category id given: throw error
+  // if invalid id given: throw error
   if (!isValidObjectId(req.params.id))
     return next(createError(404, `Invalid id: ${req.params.id}`));
 
