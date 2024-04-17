@@ -1,6 +1,10 @@
 const { Router } = require('express');
 const router = Router();
-const { validateIdParam, validatePostIdParam } = require('../utils/middleware');
+const {
+  validateIdParam,
+  validateCommentIdParam,
+  validatePostIdParam,
+} = require('../utils/middleware');
 
 const userController = require('../controllers/user-controller');
 const postController = require('../controllers/post-controller');
@@ -65,6 +69,7 @@ router.get(
 router.get(
   '/posts/:postId/comments/:commentId',
   validatePostIdParam,
+  validateCommentIdParam,
   commentController.getOne,
 );
 
@@ -79,6 +84,7 @@ router.post(
 router.put(
   '/posts/:postId/comments/:commentId',
   validatePostIdParam,
+  validateCommentIdParam,
   commentController.put,
 );
 
@@ -86,6 +92,7 @@ router.put(
 router.patch(
   '/posts/:postId/comments/:commentId',
   validatePostIdParam,
+  validateCommentIdParam,
   commentController.patch,
 );
 
@@ -93,6 +100,7 @@ router.patch(
 router.delete(
   '/posts/:postId/comments/:commentId',
   validatePostIdParam,
+  validateCommentIdParam,
   commentController.delete,
 );
 
