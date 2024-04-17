@@ -7,6 +7,7 @@ const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
+const { validateIdParam } = require('../utils/middleware');
 
 // GET all Posts
 exports.getAll = asyncHandler(async (req, res) => {
@@ -138,9 +139,46 @@ exports.post = [
 ];
 
 // PUT (fully replace) a Post
-exports.put = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PUT (fully replace) a Post' });
-};
+exports.put = [
+  validateIdParam, // throw error if invalid id param given
+
+  // validate and sanitize Post fields
+  ...validationChainPostPut,
+
+  asyncHandler(async (req, res) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    // create a Post object w/ escaped & trimmed data
+    const post = new Post({
+      title: req.body.title,
+      slug: await slugify(req.body.title, 'post', req.params.id),
+      text: req.body.text,
+      user: req.body.user,
+      isPublished: req.body.isPublished,
+      category: req.body.category,
+      tags: req.body.tags,
+      // TO DO: imgId (cover photo)
+      _id: req.params.id, // this is required, or a new ID will be assigned!
+    });
+
+    // if validation errors: send Post and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: post,
+      });
+    } else {
+      // data from form is valid. Save Post and send back as JSON.
+      await Post.findOneAndReplace({ _id: req.params.id }, post);
+      res.json({
+        message: `Post '${post.title}' replaced in database`,
+        data: post,
+      });
+    }
+  }),
+];
 
 // PATCH (partially update) a Post
 exports.patch = (req, res) => {

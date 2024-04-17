@@ -130,10 +130,13 @@ exports.put = [
       });
     } else {
       // data from form is valid. Save Category and send back as JSON.
-      await Category.findOneAndReplace({ _id: req.params.id }, category);
+      const updatedCategory = await Category.findOneAndReplace(
+        { _id: req.params.id },
+        category,
+      );
       res.json({
-        message: `Category '${category.name}' replaced in database`,
-        data: category,
+        message: `Category '${updatedCategory.name}' replaced in database`,
+        data: updatedCategory,
       });
     }
   }),

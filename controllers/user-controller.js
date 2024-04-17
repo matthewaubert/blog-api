@@ -181,10 +181,13 @@ exports.put = [
         });
       } else {
         // data from form is valid. Save User and send back as JSON.
-        await User.findOneAndReplace({ _id: req.params.id }, user);
+        const updatedUser = await User.findOneAndReplace(
+          { _id: req.params.id },
+          user,
+        );
         res.json({
-          message: `User '${user.username}' replaced in database`,
-          data: user,
+          message: `User '${updatedUser.username}' replaced in database`,
+          data: updatedUser,
         });
       }
     });
