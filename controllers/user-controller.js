@@ -307,7 +307,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!isValidObjectId(req.params.id))
     return next(createError(404, `Invalid id: ${req.params.id}`));
 
-  // get User w/ `_id` that matches `req.params.id`
+  // delete User w/ `_id` that matches `req.params.id`
   const user = await User.findByIdAndDelete(req.params.id).exec();
 
   // if User not found: throw error

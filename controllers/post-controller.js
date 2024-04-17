@@ -283,6 +283,22 @@ exports.patch = [
 ];
 
 // DELETE a Post
-exports.delete = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: DELETE a Post' });
-};
+exports.delete = asyncHandler(async (req, res, next) => {
+  // if invalid id given: throw error
+  if (!isValidObjectId(req.params.id))
+    return next(createError(404, `Invalid id: ${req.params.id}`));
+
+  // delete Post w/ `_id` that matches `req.params.id`
+  const post = await Post.findByIdAndDelete(req.params.id)
+    .populate('user', 'firstName lastName username slug')
+    .populate('category')
+    .exec();
+
+  // if Post not found: throw error
+  if (!post) return next(createError(404, 'Post not found'));
+
+  res.json({
+    message: `Post '${post.title}' deleted from database`,
+    data: post,
+  });
+});
