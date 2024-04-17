@@ -214,6 +214,22 @@ exports.patch = [
 ];
 
 // DELETE a Comment
-exports.delete = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: DELETE a Comment' });
-};
+exports.delete = asyncHandler(async (req, res, next) => {
+  // get Comment w/ `_id` that matches `req.params.commentId`
+  // and `post` that matches `req.params.postId`
+  const comment = await Comment.findOneAndDelete({
+    _id: req.params.commentId,
+    post: req.params.postId,
+  })
+    .populate('user', 'firstName lastName username slug')
+    .populate('post', 'title slug')
+    .exec();
+
+  // if Comment not found: throw error
+  if (!comment) return next(createError(404, 'Comment not found'));
+
+  res.json({
+    message: `Comment '${comment.id}' deleted from database`,
+    data: comment,
+  });
+});

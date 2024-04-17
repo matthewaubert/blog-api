@@ -99,20 +99,20 @@ To do:
 ## 4/16/24
 
 To do:
-- [ ] Post controllers
-  - [ ] GET one
-  - [ ] GET all
+- [x] Post controllers
+  - [x] GET one
+  - [x] GET all
   - [x] POST
-  - [ ] PUT
-  - [ ] PATCH
-  - [ ] DELETE
-- [ ] Comment controllers
-  - [ ] GET one
-  - [ ] GET all
-  - [ ] POST
-  - [ ] PUT
-  - [ ] PATCH
-  - [ ] DELETE
-- [ ] Turn off document versioning?
-- [ ] Start writing documentation
+  - [x] PUT
+  - [x] PATCH
+  - [x] DELETE
+- [x] Comment controllers
+  - [x] GET one
+  - [x] GET all
+  - [x] POST
+  - [x] PUT
+  - [x] PATCH
+  - [x] DELETE
 - [ ] Implement user authentication using JWT
+- [ ] Start writing documentation
+- [ ] Turn off MongoDB document versioning?
