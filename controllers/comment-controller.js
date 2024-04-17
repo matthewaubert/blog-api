@@ -112,9 +112,42 @@ exports.post = [
 ];
 
 // PUT (fully replace) a Comment
-exports.put = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PUT (fully replace) a Comment' });
-};
+exports.put = [
+  // validate and sanitize Comment fields
+  ...validationChainPostPut,
+
+  asyncHandler(async (req, res) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    // create a Comment object w/ escaped & trimmed data
+    const comment = new Comment({
+      text: req.body.text,
+      user: req.body.user,
+      post: req.params.postId,
+      _id: req.params.commentId, // this is required, or a new ID will be assigned!
+    });
+
+    // if validation errors: send Comment and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: comment,
+      });
+    } else {
+      // data from form is valid. Save Comment and send back as JSON.
+      const updatedComment = await Comment.findOneAndReplace(
+        { _id: req.params.commentId },
+        comment,
+      );
+      res.json({
+        message: `Comment '${updatedComment.id}' replaced in database`,
+        data: updatedComment,
+      });
+    }
+  }),
+];
 
 // PATCH (partially update) a Comment
 exports.patch = (req, res) => {
