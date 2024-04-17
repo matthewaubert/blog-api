@@ -54,22 +54,22 @@ router.delete('/posts/:id', postController.delete);
 /* Comment Routes */
 
 // GET all Comments
-router.get('/comments', commentController.getAll);
+router.get('/posts/:postId/comments', commentController.getAll);
 
 // GET a single Comment
-router.get('/comments/:id', commentController.getOne);
+router.get('/posts/:postId/comments/:commentId', commentController.getOne);
 
 // POST (create) a new Comment
-router.post('/comments', commentController.post);
+router.post('/posts/:postId/comments', commentController.post);
 
 // PUT (fully replace) a Comment
-router.put('/comments/:id', commentController.put);
+router.put('/posts/:postId/comments/:commentId', commentController.put);
 
 // PATCH (partially update) a Comment
-router.patch('/comments/:id', commentController.patch);
+router.patch('/posts/:postId/comments/:commentId', commentController.patch);
 
 // DELETE a Comment
-router.delete('/comments/:id', commentController.delete);
+router.delete('/posts/:postId/comments/:commentId', commentController.delete);
 
 /* Category Routes */
 
