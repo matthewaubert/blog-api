@@ -150,9 +150,68 @@ exports.put = [
 ];
 
 // PATCH (partially update) a Comment
-exports.patch = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: PATCH (partially update) a Comment' });
-};
+exports.patch = [
+  // validate and sanitize Comment fields
+  body('text')
+    .optional()
+    .trim()
+    .customSanitizer((value) => encode(value)),
+  // check that `user` is a valid user id
+  body('user')
+    .optional()
+    .trim()
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const user = isValid ? await User.findById(value).exec() : null;
+      if (!user) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid user id: ${value}`);
+    }),
+
+  asyncHandler(async (req, res) => {
+    // extract validation errors from request
+    const errors = validationResult(req);
+
+    const commentFields = {};
+    const commentSchemaPaths = Object.keys(Comment.schema.paths);
+    // console.log('commentSchemaPaths', commentSchemaPaths);
+
+    // get comment fields to update from body
+    await Promise.all(
+      // map each `req.body` key to a promise that resolves once the callback is finished
+      Object.keys(req.body).map(async (field) => {
+        // add field to commentFields if non-empty and belongs to Comment schema
+        if (req.body[field] && commentSchemaPaths.includes(field)) {
+          commentFields[field] = req.body[field];
+        }
+      }),
+    );
+
+    // console.log('commentFields:', commentFields);
+
+    // if validation errors: send commentFields and errors back as JSON
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: `${res.statusCode} Bad Request`,
+        errors: errors.array(),
+        data: commentFields,
+      });
+    } else {
+      // data from form is valid. Save Comment and send back as JSON.
+      const comment = await Comment.findOneAndUpdate(
+        { _id: req.params.commentId, post: req.params.postId }, // filter
+        commentFields, // update
+        { new: true }, // options
+      ).exec();
+      res.json({
+        message: `Comment '${comment.id}' updated in database`,
+        data: comment,
+      });
+    }
+  }),
+];
 
 // DELETE a Comment
 exports.delete = (req, res) => {
