@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const router = Router();
+const { validateIdParam, validatePostIdParam } = require('../utils/middleware');
 
 const userController = require('../controllers/user-controller');
 const postController = require('../controllers/post-controller');
@@ -17,19 +18,19 @@ router.get('/', (req, res) => {
 router.get('/users', userController.getAll);
 
 // GET a single User
-router.get('/users/:id', userController.getOne);
+router.get('/users/:id', validateIdParam, userController.getOne);
 
 // POST (create) a new User
 router.post('/users', userController.post);
 
 // PUT (fully replace) a User
-router.put('/users/:id', userController.put);
+router.put('/users/:id', validateIdParam, userController.put);
 
 // PATCH (partially update) a User
-router.patch('/users/:id', userController.patch);
+router.patch('/users/:id', validateIdParam, userController.patch);
 
 // DELETE a User
-router.delete('/users/:id', userController.delete);
+router.delete('/users/:id', validateIdParam, userController.delete);
 
 /* Post Routes */
 
@@ -37,39 +38,63 @@ router.delete('/users/:id', userController.delete);
 router.get('/posts', postController.getAll);
 
 // GET a single Post
-router.get('/posts/:id', postController.getOne);
+router.get('/posts/:id', validateIdParam, postController.getOne);
 
 // POST (create) a new Post
 router.post('/posts', postController.post);
 
 // PUT (fully replace) a Post
-router.put('/posts/:id', postController.put);
+router.put('/posts/:id', validateIdParam, postController.put);
 
 // PATCH (partially update) a Post
-router.patch('/posts/:id', postController.patch);
+router.patch('/posts/:id', validateIdParam, postController.patch);
 
 // DELETE a Post
-router.delete('/posts/:id', postController.delete);
+router.delete('/posts/:id', validateIdParam, postController.delete);
 
 /* Comment Routes */
 
 // GET all Comments
-router.get('/posts/:postId/comments', commentController.getAll);
+router.get(
+  '/posts/:postId/comments',
+  validatePostIdParam,
+  commentController.getAll,
+);
 
 // GET a single Comment
-router.get('/posts/:postId/comments/:commentId', commentController.getOne);
+router.get(
+  '/posts/:postId/comments/:commentId',
+  validatePostIdParam,
+  commentController.getOne,
+);
 
 // POST (create) a new Comment
-router.post('/posts/:postId/comments', commentController.post);
+router.post(
+  '/posts/:postId/comments',
+  validatePostIdParam,
+  commentController.post,
+);
 
 // PUT (fully replace) a Comment
-router.put('/posts/:postId/comments/:commentId', commentController.put);
+router.put(
+  '/posts/:postId/comments/:commentId',
+  validatePostIdParam,
+  commentController.put,
+);
 
 // PATCH (partially update) a Comment
-router.patch('/posts/:postId/comments/:commentId', commentController.patch);
+router.patch(
+  '/posts/:postId/comments/:commentId',
+  validatePostIdParam,
+  commentController.patch,
+);
 
 // DELETE a Comment
-router.delete('/posts/:postId/comments/:commentId', commentController.delete);
+router.delete(
+  '/posts/:postId/comments/:commentId',
+  validatePostIdParam,
+  commentController.delete,
+);
 
 /* Category Routes */
 
@@ -77,18 +102,18 @@ router.delete('/posts/:postId/comments/:commentId', commentController.delete);
 router.get('/categories', categoryController.getAll);
 
 // GET a single Category
-router.get('/categories/:id', categoryController.getOne);
+router.get('/categories/:id', validateIdParam, categoryController.getOne);
 
 // POST (create) a new Category
 router.post('/categories', categoryController.post);
 
 // PUT (fully replace) a Category
-router.put('/categories/:id', categoryController.put);
+router.put('/categories/:id', validateIdParam, categoryController.put);
 
 // PATCH (partially update) a Category
-router.patch('/categories/:id', categoryController.patch);
+router.patch('/categories/:id', validateIdParam, categoryController.patch);
 
 // DELETE a Category
-router.delete('/categories/:id', categoryController.delete);
+router.delete('/categories/:id', validateIdParam, categoryController.delete);
 
 module.exports = router;

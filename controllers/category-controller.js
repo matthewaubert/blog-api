@@ -1,11 +1,9 @@
 const Category = require('../models/category');
-const { isValidObjectId } = require('mongoose');
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
-const { validateIdParam } = require('../utils/middleware');
 
 // GET all Categories
 exports.getAll = asyncHandler(async (req, res) => {
@@ -33,10 +31,6 @@ exports.getAll = asyncHandler(async (req, res) => {
 
 // GET a single Category
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // if invalid id given: throw error
-  if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid id: ${req.params.id}`));
-
   // get Category w/ `_id` that matches `req.params.id`
   const category = await Category.findById(req.params.id).exec();
 
@@ -104,8 +98,6 @@ exports.post = [
 
 // PUT (fully replace) a Category
 exports.put = [
-  validateIdParam, // throw error if invalid id param given
-
   // validate and sanitize Category fields
   ...validationChainPostPut,
 
@@ -144,8 +136,6 @@ exports.put = [
 
 // PATCH (partially update) a Category
 exports.patch = [
-  validateIdParam, // throw error if invalid id param given
-
   // validate and sanitize Category fields
   body('name')
     .optional()
@@ -218,10 +208,6 @@ exports.patch = [
 
 // DELETE a Category
 exports.delete = asyncHandler(async (req, res, next) => {
-  // if invalid id given: throw error
-  if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid id: ${req.params.id}`));
-
   // delete Category w/ `_id` that matches `req.params.id`
   const category = await Category.findByIdAndDelete(req.params.id).exec();
 

@@ -7,7 +7,6 @@ const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
-const { validateIdParam } = require('../utils/middleware');
 
 // GET all Posts
 exports.getAll = asyncHandler(async (req, res) => {
@@ -37,10 +36,6 @@ exports.getAll = asyncHandler(async (req, res) => {
 
 // GET a single Post
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // if invalid id given: throw error
-  if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid id: ${req.params.id}`));
-
   // get Post w/ `_id` that matches `req.params.id`
   const post = await Post.findById(req.params.id)
     .populate('user', 'firstName lastName username slug')
@@ -140,8 +135,6 @@ exports.post = [
 
 // PUT (fully replace) a Post
 exports.put = [
-  validateIdParam, // throw error if invalid id param given
-
   // validate and sanitize Post fields
   ...validationChainPostPut,
 
@@ -185,8 +178,6 @@ exports.put = [
 
 // PATCH (partially update) a Post
 exports.patch = [
-  validateIdParam, // throw error if invalid id param given
-
   // validate and sanitize Post fields
   body('title')
     .optional()
@@ -284,10 +275,6 @@ exports.patch = [
 
 // DELETE a Post
 exports.delete = asyncHandler(async (req, res, next) => {
-  // if invalid id given: throw error
-  if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid id: ${req.params.id}`));
-
   // delete Post w/ `_id` that matches `req.params.id`
   const post = await Post.findByIdAndDelete(req.params.id)
     .populate('user', 'firstName lastName username slug')
