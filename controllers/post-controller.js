@@ -8,9 +8,30 @@ const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
 
 // GET all Posts
-exports.getAll = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET all Posts' });
-};
+exports.getAll = asyncHandler(async (req, res) => {
+  // if client sorts by `id`, replace property name with `_id` to work with MongoDB
+  if (req.query.sort && Object.keys(req.query.sort).includes('id')) {
+    req.query.sort._id = req.query.sort.id;
+    delete req.query.sort.id;
+  }
+  // console.log(req.query);
+
+  // get all Posts
+  const allPosts = await Post.find()
+    // default sort by `_id` asc
+    .sort(req.query.sort ? req.query.sort : { _id: 'asc' })
+    .skip(req.query.offset)
+    .limit(req.query.limit)
+    .populate('user', 'firstName lastName username slug')
+    .populate('category')
+    .exec();
+
+  res.json({
+    message: 'Posts fetched from database',
+    count: allPosts.length,
+    data: allPosts,
+  });
+});
 
 // GET a single Post
 exports.getOne = (req, res) => {

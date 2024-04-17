@@ -8,9 +8,9 @@ const PostSchema = new Schema(
     text: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     isPublished: { type: Boolean, required: true, default: false }, // whether Post has been published
-    category: { type: Schema.Types.ObjectId, ref: 'category' },
+    category: { type: Schema.Types.ObjectId, ref: 'Category' },
     tags: [{ type: String, lowercase: true }], // array of tags
-    imgId: { type: String }, // cover photo
+    // imgId: { type: String }, // TO DO: cover photo
   },
   { timestamps: true }, // https://mongoosejs.com/docs/timestamps.html
 );
