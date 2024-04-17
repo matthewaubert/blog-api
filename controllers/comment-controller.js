@@ -1,14 +1,39 @@
 const Comment = require('../models/comment');
 const User = require('../models/user');
+const Post = require('../models/post');
 const { isValidObjectId } = require('mongoose');
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 
 // GET all Comments
-exports.getAll = (req, res) => {
-  res.json({ message: 'NOT IMPLEMENTED: GET all Comments' });
-};
+exports.getAll = asyncHandler(async (req, res) => {
+  // if client sorts by `id`, replace property name with `_id` to work with MongoDB
+  if (req.query.sort && Object.keys(req.query.sort).includes('id')) {
+    req.query.sort._id = req.query.sort.id;
+    delete req.query.sort.id;
+  }
+  // console.log(req.query);
+
+  // get Post and all its Comments
+  const [post, postComments] = await Promise.all([
+    Post.findById(req.params.postId, 'title').exec(),
+    Comment.find({ post: req.params.postId })
+      // default sort by `_id` asc
+      .sort(req.query.sort ? req.query.sort : { _id: 'asc' })
+      .skip(req.query.offset)
+      .limit(req.query.limit)
+      .populate('user', 'firstName lastName username slug')
+      .populate('post', 'title slug')
+      .exec(),
+  ]);
+
+  res.json({
+    message: `Comments from post '${post.title}' fetched from database`,
+    count: postComments.length,
+    data: postComments,
+  });
+});
 
 // GET a single Comment
 exports.getOne = (req, res) => {
