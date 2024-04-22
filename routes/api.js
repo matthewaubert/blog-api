@@ -10,6 +10,7 @@ const userController = require('../controllers/user-controller');
 const postController = require('../controllers/post-controller');
 const commentController = require('../controllers/comment-controller');
 const categoryController = require('../controllers/category-controller');
+const loginController = require('../controllers/login-controller');
 
 // API index
 router.get('/', (req, res) => {
@@ -123,5 +124,10 @@ router.patch('/categories/:id', validateIdParam, categoryController.patch);
 
 // DELETE a Category
 router.delete('/categories/:id', validateIdParam, categoryController.delete);
+
+/* Login Routes */
+
+// POST login
+router.post('/login', loginController.post);
 
 module.exports = router;

@@ -1,4 +1,17 @@
+const jwt = require('jsonwebtoken'); // https://github.com/auth0/node-jsonwebtoken#readme
 const limax = require('limax'); // https://github.com/lovell/limax
+
+/**
+ * create and return a JSON web token (JWT)
+ * @param {object} user - JWT payload
+ * @returns {string} JWT
+ */
+exports.issueJwt = (user) =>
+  jwt.sign(
+    { user }, // payload
+    process.env.JWT_SECRET, // secret key
+    { expiresIn: '1h' }, // options
+  );
 
 /**
  * convert input string to unique URL-friendly format,

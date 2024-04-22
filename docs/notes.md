@@ -114,5 +114,7 @@ To do:
   - [x] PATCH
   - [x] DELETE
 - [ ] Implement user authentication using JWT
+  - [x] Build login POST controller to return JWT
+  - [ ] Verify JWT in various controllers
 - [ ] Start writing documentation
 - [ ] Turn off MongoDB document versioning?
