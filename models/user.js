@@ -14,7 +14,7 @@ const UserSchema = new Schema({
     unique: true,
   },
   password: { type: String, required: true, minLength: 8, maxLength: 100 },
-  isAuthor: { type: Boolean, required: true, default: false }, // whether User can write Posts
+  isVerified: { type: Boolean, required: true, default: false }, // whether User has been verified
   isAdmin: { type: Boolean, required: true, default: false },
 });
 

@@ -113,8 +113,19 @@ To do:
   - [x] PUT
   - [x] PATCH
   - [x] DELETE
-- [ ] Implement user authentication using JWT
+
+## 4/22/24
+
+To do:
+- [x] Implement user authentication using JWT
   - [x] Build login POST controller to return JWT
-  - [ ] Verify JWT in various controllers
+  - [x] Verify JWT in various controllers
+
+## 4/23/24
+
+To do:
+- [x] Authorize user in various controllers
+- [ ] Update JWT payload on User update
+- [ ] Ensure consistency across responses
 - [ ] Start writing documentation
 - [ ] Turn off MongoDB document versioning?

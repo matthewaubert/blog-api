@@ -134,14 +134,14 @@ exports.post = [
 exports.put = [
   // validate and sanitize User fields
   ...validationChainPostPut,
-  // validate old password matches one in database
-  body('oldPassword', 'Incorrect old password')
+  // validate current password matches one in database
+  body('currentPassword', 'Incorrect current password')
     .trim()
-    // check that `oldPassword` matches password in database
+    // check that `currentPassword` matches password in database
     .custom(async (value, { req }) => {
       const user = await User.findById(req.params.id).exec();
       const matches = user ? await bcrypt.compare(value, user.password) : false;
-      if (!matches) throw new Error('Incorrect old password');
+      if (!matches) throw new Error('Incorrect current password');
     }),
 
   asyncHandler(async (req, res, next) => {
@@ -225,14 +225,21 @@ exports.patch = [
   body('confirmPassword', 'Password confirmation must match password.')
     .trim()
     // check that password confirmation matches password
-    .custom((value, { req }) => value === req.body.password),
-  body('oldPassword')
+    .custom((value, { req }) => {
+      if (req.body.password) {
+        console.log('confirmPassword', value === req.body.password);
+        return value === req.body.password;
+      }
+
+      return true;
+    }),
+  body('currentPassword')
     .trim()
-    // check that `oldPassword` matches password in database
+    // check that `currentPassword` matches password in database
     .custom(async (value, { req }) => {
       const user = await User.findById(req.params.id).exec();
       const matches = user ? await bcrypt.compare(value, user.password) : false;
-      if (!matches) throw new Error('Incorrect old password');
+      if (!matches) throw new Error('Incorrect current password');
     }),
 
   asyncHandler(async (req, res, next) => {
@@ -262,6 +269,9 @@ exports.patch = [
             case 'password':
               userFields.password = await bcrypt.hash(req.body.password, 10);
               break;
+            // do not allow client to change admin status
+            case 'isAdmin':
+              return next(createError(403, 'Forbidden'));
             default:
               userFields[field] = req.body[field];
           }
