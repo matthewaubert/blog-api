@@ -1,7 +1,5 @@
 const Comment = require('../models/comment');
-const User = require('../models/user');
 const Post = require('../models/post');
-const { isValidObjectId } = require('mongoose');
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
@@ -63,18 +61,6 @@ const validationChainPostPut = [
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
-  // check that `user` is a valid user id
-  body('user')
-    .trim()
-    .custom(async (value) => {
-      let isValid = true;
-
-      if (!isValidObjectId(value)) isValid = false;
-      const user = isValid ? await User.findById(value).exec() : null;
-      if (!user) isValid = false;
-
-      if (!isValid) throw new Error(`Invalid user id: ${value}`);
-    }),
 ];
 
 // POST (create) a new Comment
@@ -89,7 +75,7 @@ exports.post = [
     // create a Comment object w/ escaped & trimmed data
     const comment = new Comment({
       text: req.body.text,
-      user: req.body.user,
+      user: req.authData.user._id,
       post: req.params.postId,
     });
 
@@ -123,7 +109,7 @@ exports.put = [
     // create a Comment object w/ escaped & trimmed data
     const comment = new Comment({
       text: req.body.text,
-      user: req.body.user,
+      user: req.authData.user._id,
       post: req.params.postId,
       _id: req.params.commentId, // this is required, or a new ID will be assigned!
     });
@@ -156,19 +142,6 @@ exports.patch = [
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
-  // check that `user` is a valid user id
-  body('user')
-    .optional()
-    .trim()
-    .custom(async (value) => {
-      let isValid = true;
-
-      if (!isValidObjectId(value)) isValid = false;
-      const user = isValid ? await User.findById(value).exec() : null;
-      if (!user) isValid = false;
-
-      if (!isValid) throw new Error(`Invalid user id: ${value}`);
-    }),
 
   asyncHandler(async (req, res) => {
     // extract validation errors from request

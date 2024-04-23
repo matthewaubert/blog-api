@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const router = Router();
+const { verifyToken } = require('../utils/auth-middleware');
 const {
   validateIdParam,
   validateCommentIdParam,
@@ -20,22 +21,27 @@ router.get('/', (req, res) => {
 /* User Routes */
 
 // GET all Users
-router.get('/users', userController.getAll);
+router.get('/users', verifyToken, userController.getAll);
 
 // GET a single User
-router.get('/users/:id', validateIdParam, userController.getOne);
+router.get('/users/:id', verifyToken, validateIdParam, userController.getOne);
 
 // POST (create) a new User
 router.post('/users', userController.post);
 
 // PUT (fully replace) a User
-router.put('/users/:id', validateIdParam, userController.put);
+router.put('/users/:id', verifyToken, validateIdParam, userController.put);
 
 // PATCH (partially update) a User
-router.patch('/users/:id', validateIdParam, userController.patch);
+router.patch('/users/:id', verifyToken, validateIdParam, userController.patch);
 
 // DELETE a User
-router.delete('/users/:id', validateIdParam, userController.delete);
+router.delete(
+  '/users/:id',
+  verifyToken,
+  validateIdParam,
+  userController.delete,
+);
 
 /* Post Routes */
 
@@ -46,16 +52,21 @@ router.get('/posts', postController.getAll);
 router.get('/posts/:id', validateIdParam, postController.getOne);
 
 // POST (create) a new Post
-router.post('/posts', postController.post);
+router.post('/posts', verifyToken, postController.post);
 
 // PUT (fully replace) a Post
-router.put('/posts/:id', validateIdParam, postController.put);
+router.put('/posts/:id', verifyToken, validateIdParam, postController.put);
 
 // PATCH (partially update) a Post
-router.patch('/posts/:id', validateIdParam, postController.patch);
+router.patch('/posts/:id', verifyToken, validateIdParam, postController.patch);
 
 // DELETE a Post
-router.delete('/posts/:id', validateIdParam, postController.delete);
+router.delete(
+  '/posts/:id',
+  verifyToken,
+  validateIdParam,
+  postController.delete,
+);
 
 /* Comment Routes */
 
@@ -77,6 +88,7 @@ router.get(
 // POST (create) a new Comment
 router.post(
   '/posts/:postId/comments',
+  verifyToken,
   validatePostIdParam,
   commentController.post,
 );
@@ -84,6 +96,7 @@ router.post(
 // PUT (fully replace) a Comment
 router.put(
   '/posts/:postId/comments/:commentId',
+  verifyToken,
   validatePostIdParam,
   validateCommentIdParam,
   commentController.put,
@@ -92,6 +105,7 @@ router.put(
 // PATCH (partially update) a Comment
 router.patch(
   '/posts/:postId/comments/:commentId',
+  verifyToken,
   validatePostIdParam,
   validateCommentIdParam,
   commentController.patch,
@@ -100,6 +114,7 @@ router.patch(
 // DELETE a Comment
 router.delete(
   '/posts/:postId/comments/:commentId',
+  verifyToken,
   validatePostIdParam,
   validateCommentIdParam,
   commentController.delete,
@@ -114,16 +129,31 @@ router.get('/categories', categoryController.getAll);
 router.get('/categories/:id', validateIdParam, categoryController.getOne);
 
 // POST (create) a new Category
-router.post('/categories', categoryController.post);
+router.post('/categories', verifyToken, categoryController.post);
 
 // PUT (fully replace) a Category
-router.put('/categories/:id', validateIdParam, categoryController.put);
+router.put(
+  '/categories/:id',
+  verifyToken,
+  validateIdParam,
+  categoryController.put,
+);
 
 // PATCH (partially update) a Category
-router.patch('/categories/:id', validateIdParam, categoryController.patch);
+router.patch(
+  '/categories/:id',
+  verifyToken,
+  validateIdParam,
+  categoryController.patch,
+);
 
 // DELETE a Category
-router.delete('/categories/:id', validateIdParam, categoryController.delete);
+router.delete(
+  '/categories/:id',
+  verifyToken,
+  validateIdParam,
+  categoryController.delete,
+);
 
 /* Login Routes */
 
