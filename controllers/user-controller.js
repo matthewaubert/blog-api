@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const bcrypt = require('bcryptjs'); // https://www.npmjs.com/package/bcryptjs
-const { slugify } = require('../utils/util');
+const { issueJwt, slugify } = require('../utils/util');
 
 // GET all Users
 exports.getAll = asyncHandler(async (req, res) => {
@@ -172,13 +172,14 @@ exports.put = [
           data: user,
         });
       } else {
-        // data from form is valid. Save User and send back as JSON.
+        // data from form is valid. Save User, issue new JWT, send both as JSON.
         const updatedUser = await User.findOneAndReplace(
           { _id: req.params.id },
           user,
         );
         res.json({
           message: `User '${updatedUser.username}' replaced in database`,
+          token: issueJwt(updatedUser),
           data: updatedUser,
         });
       }
@@ -289,12 +290,13 @@ exports.patch = [
         data: userFields,
       });
     } else {
-      // data from form is valid. Save User and send back as JSON.
+      // data from form is valid. Save User, issue new JWT, send both as JSON.
       const user = await User.findByIdAndUpdate(req.params.id, userFields, {
         new: true,
       }).exec();
       res.json({
         message: `User '${user.username}' updated in database`,
+        token: issueJwt(user),
         data: user,
       });
     }

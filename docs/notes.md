@@ -125,7 +125,7 @@ To do:
 
 To do:
 - [x] Authorize user in various controllers
-- [ ] Update JWT payload on User update
+- [x] Issue new JWT payload on User update
 - [ ] Ensure consistency across responses
 - [ ] Start writing documentation
 - [ ] Turn off MongoDB document versioning?
