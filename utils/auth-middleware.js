@@ -1,6 +1,7 @@
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 const jwt = require('jsonwebtoken'); // https://github.com/auth0/node-jsonwebtoken#readme
+const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 
 // verify JSON web token (JWT)
@@ -71,6 +72,12 @@ exports.isPostAuthor = asyncHandler(async (req, res, next) => {
 
   const post = await Post.findById(req.params.id, 'user').exec();
 
+  // if Post not found: throw error
+  if (!post) return next(createError(404, 'Post not found'));
+
+  console.log('post:', post);
+  // console.log('req.authData.user._id:', req.authData.user._id);
+  // console.log('post.user:', post.user.toString());
   req.authData.user._id === post.user.toString()
     ? next()
     : res.status(403).json({
@@ -84,6 +91,9 @@ exports.isCommentAuthor = asyncHandler(async (req, res, next) => {
   if (req.authData.user.isAdmin) return next();
 
   const comment = await Comment.findById(req.params.id, 'user').exec();
+
+  // if Comment not found: throw error
+  if (!comment) return next(createError(404, 'Comment not found'));
 
   req.authData.user._id === comment.user.toString()
     ? next()
