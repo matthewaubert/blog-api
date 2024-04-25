@@ -27,6 +27,7 @@ exports.getAll = asyncHandler(async (req, res) => {
     .exec();
 
   res.json({
+    success: true,
     message: 'Posts fetched from database',
     count: allPosts.length,
     data: allPosts,
@@ -45,6 +46,7 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   if (!post) return next(createError(404, 'Post not found'));
 
   res.json({
+    success: true,
     message: `Post '${post.title}' fetched from database`,
     data: post,
   });
@@ -105,6 +107,7 @@ exports.post = [
     // if validation errors: send Post and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: post,
@@ -112,7 +115,9 @@ exports.post = [
     } else {
       // data from form is valid. Save Post and send back as JSON.
       await post.save();
+
       res.json({
+        success: true,
         message: `Post '${post.title}' saved to database`,
         data: post,
       });
@@ -145,6 +150,7 @@ exports.put = [
     // if validation errors: send Post and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: post,
@@ -155,7 +161,9 @@ exports.put = [
         { _id: req.params.id },
         post,
       );
+
       res.json({
+        success: true,
         message: `Post '${updatedPost.title}' replaced in database`,
         data: updatedPost,
       });
@@ -230,6 +238,7 @@ exports.patch = [
     // if validation errors: send postFields and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: postFields,
@@ -239,7 +248,9 @@ exports.patch = [
       const post = await Post.findByIdAndUpdate(req.params.id, postFields, {
         new: true,
       }).exec();
+      
       res.json({
+        success: true,
         message: `Post '${post.title}' updated in database`,
         data: post,
       });
@@ -259,6 +270,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!post) return next(createError(404, 'Post not found'));
 
   res.json({
+    success: true,
     message: `Post '${post.title}' deleted from database`,
     data: post,
   });

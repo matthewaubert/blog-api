@@ -22,7 +22,10 @@ const loginController = require('../controllers/login-controller');
 
 // API index
 router.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the API' });
+  res.json({
+    success: true,
+    message: 'Welcome to the API',
+  });
 });
 
 /* User Routes */

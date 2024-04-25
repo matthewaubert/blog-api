@@ -24,6 +24,7 @@ exports.getAll = asyncHandler(async (req, res) => {
     .exec();
 
   res.json({
+    success: true,
     message: 'Users fetched from database',
     count: allUsers.length,
     data: allUsers,
@@ -39,6 +40,7 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   if (!user) return next(createError(404, 'User not found'));
 
   res.json({
+    success: true,
     message: `User '${user.username}' fetched from database`,
     data: user,
   });
@@ -114,6 +116,7 @@ exports.post = [
       // if validation errors: send User and errors back as JSON
       if (!errors.isEmpty()) {
         res.status(400).json({
+          success: false,
           message: `${res.statusCode} Bad Request`,
           errors: errors.array(),
           data: user,
@@ -121,7 +124,9 @@ exports.post = [
       } else {
         // data from form is valid. Save User and send back as JSON.
         await user.save();
+
         res.json({
+          success: true,
           message: `User '${user.username}' saved to database`,
           data: user,
         });
@@ -167,6 +172,7 @@ exports.put = [
       // if validation errors: send User and errors back as JSON
       if (!errors.isEmpty()) {
         res.status(400).json({
+          success: false,
           message: `${res.statusCode} Bad Request`,
           errors: errors.array(),
           data: user,
@@ -177,7 +183,9 @@ exports.put = [
           { _id: req.params.id },
           user,
         );
+
         res.json({
+          success: true,
           message: `User '${updatedUser.username}' replaced in database`,
           token: issueJwt(updatedUser),
           data: updatedUser,
@@ -285,6 +293,7 @@ exports.patch = [
     // if validation errors: send userFields and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: userFields,
@@ -294,7 +303,9 @@ exports.patch = [
       const user = await User.findByIdAndUpdate(req.params.id, userFields, {
         new: true,
       }).exec();
+      
       res.json({
+        success: true,
         message: `User '${user.username}' updated in database`,
         token: issueJwt(user),
         data: user,
@@ -312,6 +323,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!user) return next(createError(404, 'User not found'));
 
   res.json({
+    success: true,
     message: `User '${user.username}' deleted from database`,
     data: user,
   });

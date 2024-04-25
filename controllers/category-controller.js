@@ -23,6 +23,7 @@ exports.getAll = asyncHandler(async (req, res) => {
     .exec();
 
   res.json({
+    success: true,
     message: 'Categories fetched from database',
     count: allCategories.length,
     data: allCategories,
@@ -38,6 +39,7 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   if (!category) return next(createError(404, 'Category not found'));
 
   res.json({
+    success: true,
     message: `Category '${category.name}' fetched from database`,
     data: category,
   });
@@ -81,6 +83,7 @@ exports.post = [
     // if validation errors: send Category and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: category,
@@ -88,7 +91,9 @@ exports.post = [
     } else {
       // data from form is valid. Save Category and send back as JSON.
       await category.save();
+
       res.json({
+        success: true,
         message: `Category '${category.name}' saved to database`,
         data: category,
       });
@@ -116,6 +121,7 @@ exports.put = [
     // if validation errors: send Category and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: category,
@@ -126,7 +132,9 @@ exports.put = [
         { _id: req.params.id },
         category,
       );
+
       res.json({
+        success: true,
         message: `Category '${updatedCategory.name}' replaced in database`,
         data: updatedCategory,
       });
@@ -187,6 +195,7 @@ exports.patch = [
     // if validation errors: send categoryFields and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: categoryFields,
@@ -198,7 +207,9 @@ exports.patch = [
         categoryFields,
         { new: true },
       ).exec();
+
       res.json({
+        success: true,
         message: `Category '${category.name}' updated in database`,
         data: category,
       });
@@ -215,6 +226,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!category) return next(createError(404, 'Category not found'));
 
   res.json({
+    success: true,
     message: `Category '${category.name}' deleted from database`,
     data: category,
   });

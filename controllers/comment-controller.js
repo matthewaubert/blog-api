@@ -28,6 +28,7 @@ exports.getAll = asyncHandler(async (req, res) => {
   ]);
 
   res.json({
+    success: true,
     message: `Comments from post '${post.title}' fetched from database`,
     count: postComments.length,
     data: postComments,
@@ -50,6 +51,7 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   if (!comment) return next(createError(404, 'Comment not found'));
 
   res.json({
+    success: true,
     message: `Comment '${comment.id}' fetched from database`,
     data: comment,
   });
@@ -82,6 +84,7 @@ exports.post = [
     // if validation errors: send Comment and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: comment,
@@ -89,7 +92,9 @@ exports.post = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       await comment.save();
+      
       res.json({
+        success: true,
         message: `Comment '${comment.id}' saved to database`,
         data: comment,
       });
@@ -117,6 +122,7 @@ exports.put = [
     // if validation errors: send Comment and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: comment,
@@ -127,7 +133,9 @@ exports.put = [
         { _id: req.params.commentId },
         comment,
       );
+
       res.json({
+        success: true,
         message: `Comment '${updatedComment.id}' replaced in database`,
         data: updatedComment,
       });
@@ -167,6 +175,7 @@ exports.patch = [
     // if validation errors: send commentFields and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
+        success: false,
         message: `${res.statusCode} Bad Request`,
         errors: errors.array(),
         data: commentFields,
@@ -178,7 +187,9 @@ exports.patch = [
         commentFields, // update
         { new: true }, // options
       ).exec();
+
       res.json({
+        success: true,
         message: `Comment '${comment.id}' updated in database`,
         data: comment,
       });
@@ -202,6 +213,7 @@ exports.delete = asyncHandler(async (req, res, next) => {
   if (!comment) return next(createError(404, 'Comment not found'));
 
   res.json({
+    success: true,
     message: `Comment '${comment.id}' deleted from database`,
     data: comment,
   });

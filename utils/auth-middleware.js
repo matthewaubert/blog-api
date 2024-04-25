@@ -17,7 +17,6 @@ exports.verifyToken = (req, res, next) => {
     });
 
   // if bearer is not undefined: get token
-  // eslint-disable-next-line prefer-destructuring
   const token = authHeader.split(' ')[1];
   // console.log('token', token);
 
@@ -27,7 +26,7 @@ exports.verifyToken = (req, res, next) => {
       return res.status(403).json({
         success: false,
         message: 'Forbidden',
-        error: err,
+        errors: [err],
       });
 
     // if no error: set authData
