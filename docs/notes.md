@@ -131,5 +131,8 @@ To do:
 To do:
 - [x] Issue new JWT payload on User update
 - [x] Ensure consistency across responses
-- [ ] Start writing documentation
+- [x] Write README first draft
+- [ ] Change JWT expiration
+- [ ] Clean up, remove console.logs
 - [ ] Turn off MongoDB document versioning?
+- [ ] Deploy to Fly.io
