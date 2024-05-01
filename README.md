@@ -84,6 +84,19 @@ e.g. `GET /api/posts` will return:
 }
 ```
 
+This resource supports any combination of the following query parameters
+- `sort` to sort resource instances by a field in ascending or descending order
+  - e.g. `GET /api/posts?sort[title]=asc` will sort Post resource instances by title in ascending order
+  - e.g. `GET /api/posts?sort[text]=desc` will sort Post resource instances by text in descending order
+  - Note: By default, resource instances are sorted by ID in ascending order
+- `offset` to skip resource instances
+  - e.g. `GET /api/posts?offset=2` will skip the first 2 Post resource instances and return the rest
+- `limit` to limit the number of resource instances returned
+  - e.g. `GET /api/posts?limit=3` will only return the first 3 Post resource instances
+- Query parameters can be chained
+  - e.g. `GET /api/posts?sort[title]=asc&offset=2&limit=3` will sort Post resource instances by title in ascending order, skip the first 2, and finally return the next 3
+  - Note: Parameter order matters!
+
 ### Get one resource instance
 
 Making a `GET` request on an API endpoint with a resource ID will return the one resource instance with a matching ID.

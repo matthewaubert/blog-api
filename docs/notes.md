@@ -137,6 +137,6 @@ To do:
 - [x] Change JWT expiration
 - [x] Clean up, remove console.logs
 - [x] Enable admins to update `user` fields
-- [ ] Write about query params in `GET` endpoints
+- [x] Write about query params in `GET` endpoints
 - [ ] Turn off MongoDB document versioning?
 - [ ] Deploy to Fly.io
