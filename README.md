@@ -11,6 +11,7 @@ A RESTful API utilizing JWT authentication to power a blogging platform.
 # Documentation
 
 ## Resources
+
 There are 5 resources in this API:
 - Users
 - Posts
@@ -21,6 +22,7 @@ There are 5 resources in this API:
 ## How to Use
 
 You can obtain resources from the API using various means. For example:
+
 - JavaScript Fetch API
   ```javascript
   fetch('http://<domain-name>/api/posts')
@@ -36,9 +38,33 @@ You can obtain resources from the API using various means. For example:
   curl http://<domain-name>/api/posts
   ```
 
-Depending on the resource, you may need to attach a valid JSON web token (JWT) in the `Authorization` header with the proper authorization in the payload. e.g. `Authorization: Bearer <jwt-token-here>`
+### Obtain JWT via `login` Route
+
+Depending on the resource, you may need to attach a valid JSON web token (JWT) in the `Authorization` header with the proper authorization in the payload. e.g. `Authorization: Bearer <json-web-token>`
+
+In order to obtain a JWT, make a `POST` request on the `/api/login` endpoint with your user credentials.
+
+e.g. `POST /api/login` with the following body
+```json
+{
+  "email": "example@email.com",
+  "password": "example-password"
+}
+```
+will return
+```jsonc
+{
+  "success": true,
+  "message": "You are now authenticated",
+  "token": "<json-web-token>" // your valid JWT would be here
+}
+```
+assuming there is a valid user with those credentials in the database.
+
+Your JWT will provide more access to different resources in the API if the user in the payload has been verified. (An email verification feature will be included in a future release.)
 
 ### Get all resource instances
+
 Making a `GET` request on an API endpoint without a resource ID will return a list of all available instances of that resource.
 
 e.g. `GET /api/posts` will return:
@@ -54,7 +80,7 @@ e.g. `GET /api/posts` will return:
       // other resource properties
     },
     // 4 other resource instances
-  ]
+  ],
 }
 ```
 
@@ -71,7 +97,7 @@ e.g. `GET /api/posts/661ed5e44e9bbfd5772851eb` will return:
     "_id": "661ed5e44e9bbfd5772851eb",
     "title": "First Post",
     // other resource properties
-  }
+  },
 }
 ```
 
@@ -79,7 +105,7 @@ e.g. `GET /api/posts/661ed5e44e9bbfd5772851eb` will return:
 
 Making a `POST` request on an API endpoint without a resource ID will create and return a new resource instance.
 
-In the case of a Post or Comment resource, The user ID in the JWT payload sent in the `Authorization` header will be included in the resource's `user` field.
+In the case of a Post or Comment resource, the user ID in the JWT payload sent in the `Authorization` header will be included in the resource's `user` field.
 
 e.g. `POST /api/posts` with the following body
 ```json
@@ -100,13 +126,10 @@ will return:
     "text": "This is the text of a new post!",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
-    "tags": [
-      "new",
-      "post"
-    ],
+    "tags": ["new", "post"],
     "_id": "662ab91421be18d008e14500",
     "createdAt": "2024-04-25T20:12:04.150Z",
-    "updatedAt": "2024-04-25T20:12:04.150Z",
+    "updatedAt": "2024-04-25T20:12:04.150Z"
   }
 }
 ```
@@ -137,10 +160,7 @@ will return:
     "text": "This is the text of a replaced post!",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
-    "tags": [
-      "replaced",
-      "post"
-    ],
+    "tags": ["replaced", "post"],
     "createdAt": "2024-04-25T20:18:47.161Z",
     "updatedAt": "2024-04-25T20:18:47.161Z"
   }
@@ -169,10 +189,7 @@ will return:
     "text": "This is the text of a replaced post!",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
-    "tags": [
-      "replaced",
-      "post"
-    ],
+    "tags": ["replaced", "post"],
     "createdAt": "2024-04-25T20:22:38.188Z",
     "updatedAt": "2024-04-25T20:24:54.736Z"
   }
@@ -201,12 +218,46 @@ e.g. `DELETE /api/posts/662ab91421be18d008e14500` will return:
       "slug": "sam-smith"
     },
     "isPublished": false,
-    "tags": [
-      "replaced",
-      "post"
-    ],
+    "tags": ["replaced", "post"],
     "createdAt": "2024-04-25T20:22:38.188Z",
     "updatedAt": "2024-04-25T20:24:54.736Z"
+  }
+}
+```
+
+### Error Messages
+
+All responses include a `"success"` field – a boolean value to tell you whether the request succeeded – and `"message"` field – a string providing you more information about the request. Most failed requests will also provide an `"error"` field – an array of objects describing the error(s).
+
+e.g. `POST /api/posts` without a body will return:
+```json
+{
+  "success": false,
+  "message": "400 Bad Request",
+  "errors": [
+    {
+      "type": "field",
+      "value": "",
+      "msg": "Title must not be empty.",
+      "path": "title",
+      "location": "body"
+    },
+    {
+      "type": "field",
+      "value": "",
+      "msg": "Text must not be empty.",
+      "path": "text",
+      "location": "body"
+    }
+  ],
+  "data": {
+    "title": "",
+    "slug": "",
+    "text": "",
+    "user": "661d55e453a14e1c7458e23a",
+    "isPublished": false,
+    "tags": [],
+    "_id": "663190f901b3f9d205c8656f"
   }
 }
 ```
@@ -223,15 +274,18 @@ This project was built in order to practice implementing the following skills:
 ## Technologies Used
 
 ### Languages
+
 - JavaScript
 
 ### Frameworks and Tools
+
 - Node.js
 - Express
 - MongoDB, Mongoose
 - Git (obviously)
 
 ### Libraries and Middleware
+
 - [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) – an implementation of JSON web tokens for Node.js
 - [bcryptjs](https://www.npmjs.com/package/bcryptjs) – for securing passwords by hashing and salting
 - [express-async-handler](https://www.npmjs.com/package/express-async-handler) – asynchronous exception-handling middleware for Express

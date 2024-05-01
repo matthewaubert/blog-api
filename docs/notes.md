@@ -132,6 +132,8 @@ To do:
 - [x] Issue new JWT payload on User update
 - [x] Ensure consistency across responses
 - [x] Write README first draft
+- [x] Write README instructions for login endpoint
+- [x] Write about error messages in README
 - [ ] Change JWT expiration
 - [ ] Clean up, remove console.logs
 - [ ] Turn off MongoDB document versioning?
