@@ -14,7 +14,6 @@ exports.getAll = asyncHandler(async (req, res) => {
     req.query.sort._id = req.query.sort.id;
     delete req.query.sort.id;
   }
-  // console.log(req.query);
 
   // get all Posts
   const allPosts = await Post.find()
@@ -208,7 +207,6 @@ exports.patch = [
 
     const postFields = {};
     const postSchemaPaths = Object.keys(Post.schema.paths);
-    // console.log('postSchemaPaths', postSchemaPaths);
 
     // get post fields to update from body
     await Promise.all(
@@ -233,8 +231,6 @@ exports.patch = [
       }),
     );
 
-    // console.log('postFields:', postFields);
-
     // if validation errors: send postFields and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
@@ -248,7 +244,7 @@ exports.patch = [
       const post = await Post.findByIdAndUpdate(req.params.id, postFields, {
         new: true,
       }).exec();
-      
+
       res.json({
         success: true,
         message: `Post '${post.title}' updated in database`,

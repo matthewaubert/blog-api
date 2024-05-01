@@ -12,7 +12,6 @@ exports.getAll = asyncHandler(async (req, res) => {
     req.query.sort._id = req.query.sort.id;
     delete req.query.sort.id;
   }
-  // console.log(req.query);
 
   // get Post and all its Comments
   const [post, postComments] = await Promise.all([
@@ -157,7 +156,6 @@ exports.patch = [
 
     const commentFields = {};
     const commentSchemaPaths = Object.keys(Comment.schema.paths);
-    // console.log('commentSchemaPaths', commentSchemaPaths);
 
     // get comment fields to update from body
     await Promise.all(
@@ -169,8 +167,6 @@ exports.patch = [
         }
       }),
     );
-
-    // console.log('commentFields:', commentFields);
 
     // if validation errors: send commentFields and errors back as JSON
     if (!errors.isEmpty()) {

@@ -13,7 +13,6 @@ exports.getAll = asyncHandler(async (req, res) => {
     req.query.sort._id = req.query.sort.id;
     delete req.query.sort.id;
   }
-  // console.log(req.query);
 
   // get all Users
   const allUsers = await User.find()
@@ -236,7 +235,6 @@ exports.patch = [
     // check that password confirmation matches password
     .custom((value, { req }) => {
       if (req.body.password) {
-        console.log('confirmPassword', value === req.body.password);
         return value === req.body.password;
       }
 
@@ -288,8 +286,6 @@ exports.patch = [
       }),
     );
 
-    // console.log('userFields:', userFields);
-
     // if validation errors: send userFields and errors back as JSON
     if (!errors.isEmpty()) {
       res.status(400).json({
@@ -303,7 +299,7 @@ exports.patch = [
       const user = await User.findByIdAndUpdate(req.params.id, userFields, {
         new: true,
       }).exec();
-      
+
       res.json({
         success: true,
         message: `User '${user.username}' updated in database`,

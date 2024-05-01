@@ -46,6 +46,5 @@ exports.slugify = async (str, model, id) => {
     console.error(err);
   }
 
-  // console.log(uniqueSlug);
   return uniqueSlug;
 };

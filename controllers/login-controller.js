@@ -11,9 +11,6 @@ exports.post = asyncHandler(async (req, res) => {
     ? await bcrypt.compare(req.body.password, user.password)
     : false;
 
-  // console.log('user', user);
-  // console.log('match', match);
-
   // if match: issue JWT
   if (match) {
     res.status(200).json({

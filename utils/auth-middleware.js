@@ -19,7 +19,6 @@ exports.verifyToken = (req, res, next) => {
 
   // if bearer is not undefined: get token
   const token = authHeader.split(' ')[1];
-  // console.log('token', token);
 
   jwt.verify(token, process.env.JWT_SECRET, (err, authData) => {
     // if err: forbidden
@@ -75,9 +74,6 @@ exports.isPostAuthor = asyncHandler(async (req, res, next) => {
   // if Post not found: throw error
   if (!post) return next(createError(404, 'Post not found'));
 
-  console.log('post:', post);
-  // console.log('req.authData.user._id:', req.authData.user._id);
-  // console.log('post.user:', post.user.toString());
   req.authData.user._id === post.user.toString()
     ? next()
     : res.status(403).json({

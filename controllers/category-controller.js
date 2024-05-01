@@ -12,7 +12,6 @@ exports.getAll = asyncHandler(async (req, res) => {
     req.query.sort._id = req.query.sort.id;
     delete req.query.sort.id;
   }
-  // console.log(req.query);
 
   // get all Categories
   const allCategories = await Category.find()
@@ -189,8 +188,6 @@ exports.patch = [
         }
       }),
     );
-
-    // console.log('categoryFields:', categoryFields);
 
     // if validation errors: send categoryFields and errors back as JSON
     if (!errors.isEmpty()) {
