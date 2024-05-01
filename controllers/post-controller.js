@@ -1,4 +1,5 @@
 const Post = require('../models/post');
+const User = require('../models/user');
 const Category = require('../models/category');
 const { isValidObjectId } = require('mongoose');
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
@@ -61,6 +62,19 @@ const validationChainPostPut = [
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
+  body('user')
+    .optional()
+    .trim()
+    // check that `user` is a valid user id
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const user = isValid ? await User.findById(value).exec() : null;
+      if (!user) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid user id: ${value}`);
+    }),
   body('isPublished', 'Must be true or false').optional().isBoolean(),
   body('category')
     .optional()
@@ -96,7 +110,12 @@ exports.post = [
       title: req.body.title,
       slug: await slugify(req.body.title, 'post'),
       text: req.body.text,
-      user: req.authData.user._id,
+      // if user is an admin and supplied `user` field, use it;
+      // else, use JWT payload user id
+      user:
+        req.authData.user.isAdmin && req.body.user
+          ? req.body.user
+          : req.authData.user._id,
       isPublished: req.body.isPublished,
       category: req.body.category,
       tags: req.body.tags,
@@ -138,7 +157,12 @@ exports.put = [
       title: req.body.title,
       slug: await slugify(req.body.title, 'post', req.params.id),
       text: req.body.text,
-      user: req.authData.user._id,
+      // if user is an admin and supplied `user` field, use it;
+      // else, use JWT payload user id
+      user:
+        req.authData.user.isAdmin && req.body.user
+          ? req.body.user
+          : req.authData.user._id,
       isPublished: req.body.isPublished,
       category: req.body.category,
       tags: req.body.tags,
@@ -182,6 +206,19 @@ exports.patch = [
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
+  body('user')
+    .optional()
+    .trim()
+    // check that `user` is a valid user id
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const user = isValid ? await User.findById(value).exec() : null;
+      if (!user) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid user id: ${value}`);
+    }),
   body('isPublished', 'Must be true or false').optional().isBoolean(),
   body('category')
     .optional()
@@ -224,6 +261,10 @@ exports.patch = [
                 'post',
                 req.params.id,
               );
+              break;
+            // if user is an admin and supplied `user` field, use it
+            case 'user':
+              if (req.authData.user.isAdmin) postFields.user = req.body.user;
               break;
             default:
               postFields[field] = req.body[field];

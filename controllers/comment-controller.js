@@ -1,5 +1,7 @@
 const Comment = require('../models/comment');
 const Post = require('../models/post');
+const User = require('../models/user');
+const { isValidObjectId } = require('mongoose');
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { body, validationResult } = require('express-validator'); // https://express-validator.github.io/docs
@@ -62,6 +64,19 @@ const validationChainPostPut = [
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
+  body('user')
+    .optional()
+    .trim()
+    // check that `user` is a valid user id
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const user = isValid ? await User.findById(value).exec() : null;
+      if (!user) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid user id: ${value}`);
+    }),
 ];
 
 // POST (create) a new Comment
@@ -76,7 +91,12 @@ exports.post = [
     // create a Comment object w/ escaped & trimmed data
     const comment = new Comment({
       text: req.body.text,
-      user: req.authData.user._id,
+      // if user is an admin and supplied `user` field, use it;
+      // else, use JWT payload user id
+      user:
+        req.authData.user.isAdmin && req.body.user
+          ? req.body.user
+          : req.authData.user._id,
       post: req.params.postId,
     });
 
@@ -91,7 +111,7 @@ exports.post = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       await comment.save();
-      
+
       res.json({
         success: true,
         message: `Comment '${comment.id}' saved to database`,
@@ -113,7 +133,12 @@ exports.put = [
     // create a Comment object w/ escaped & trimmed data
     const comment = new Comment({
       text: req.body.text,
-      user: req.authData.user._id,
+      // if user is an admin and supplied `user` field, use it;
+      // else, use JWT payload user id
+      user:
+        req.authData.user.isAdmin && req.body.user
+          ? req.body.user
+          : req.authData.user._id,
       post: req.params.postId,
       _id: req.params.commentId, // this is required, or a new ID will be assigned!
     });
@@ -150,6 +175,19 @@ exports.patch = [
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
+  body('user')
+    .optional()
+    .trim()
+    // check that `user` is a valid user id
+    .custom(async (value) => {
+      let isValid = true;
+
+      if (!isValidObjectId(value)) isValid = false;
+      const user = isValid ? await User.findById(value).exec() : null;
+      if (!user) isValid = false;
+
+      if (!isValid) throw new Error(`Invalid user id: ${value}`);
+    }),
 
   asyncHandler(async (req, res) => {
     // extract validation errors from request
@@ -164,7 +202,14 @@ exports.patch = [
       Object.keys(req.body).map(async (field) => {
         // add field to commentFields if non-empty and belongs to Comment schema
         if (req.body[field] && commentSchemaPaths.includes(field)) {
-          commentFields[field] = req.body[field];
+          switch (field) {
+            // if user is an admin and supplied `user` field, use it
+            case 'user':
+              if (req.authData.user.isAdmin) commentFields.user = req.body.user;
+              break;
+            default:
+              commentFields[field] = req.body[field];
+          }
         }
       }),
     );
