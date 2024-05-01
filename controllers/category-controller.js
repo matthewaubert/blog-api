@@ -128,8 +128,9 @@ exports.put = [
     } else {
       // data from form is valid. Save Category and send back as JSON.
       const updatedCategory = await Category.findOneAndReplace(
-        { _id: req.params.id },
-        category,
+        { _id: req.params.id }, // filter
+        category, // replacement
+        { returnDocument: 'after' }, // options
       );
 
       res.json({

@@ -179,8 +179,9 @@ exports.put = [
       } else {
         // data from form is valid. Save User, issue new JWT, send both as JSON.
         const updatedUser = await User.findOneAndReplace(
-          { _id: req.params.id },
-          user,
+          { _id: req.params.id }, // filter
+          user, // replacement
+          { returnDocument: 'after' }, // options
         );
 
         res.json({

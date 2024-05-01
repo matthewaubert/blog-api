@@ -161,8 +161,8 @@ will return:
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
     "tags": ["replaced", "post"],
-    "createdAt": "2024-04-25T20:18:47.161Z",
-    "updatedAt": "2024-04-25T20:18:47.161Z"
+    "createdAt": "2024-04-25T20:22:38.188Z",
+    "updatedAt": "2024-04-25T20:22:38.188Z"
   }
 }
 ```

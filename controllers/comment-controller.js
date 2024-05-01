@@ -129,8 +129,9 @@ exports.put = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       const updatedComment = await Comment.findOneAndReplace(
-        { _id: req.params.commentId },
-        comment,
+        { _id: req.params.commentId }, // filter
+        comment, // replacement
+        { returnDocument: 'after' }, // options
       );
 
       res.json({

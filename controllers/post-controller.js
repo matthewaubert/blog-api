@@ -157,8 +157,9 @@ exports.put = [
     } else {
       // data from form is valid. Save Post and send back as JSON.
       const updatedPost = await Post.findOneAndReplace(
-        { _id: req.params.id },
-        post,
+        { _id: req.params.id }, // filter
+        post, // replacement
+        { returnDocument: 'after' }, // options
       );
 
       res.json({
