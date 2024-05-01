@@ -7,8 +7,20 @@ const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
 const apiRouter = require('./routes/api');
+const compression = require('compression');
+const helmet = require('helmet');
 
 const app = express();
+
+// set up rate limiter
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 min
+  max: 20, // limit each IP to 20 requests per `window`
+});
+app.use(limiter); // apply rate limiter to all requests
+
+app.use(helmet()); // protect app from well-known vulnerabilities
 
 // Set up mongoose connection
 const mongoose = require('mongoose');
@@ -24,6 +36,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression()); // compress all routes
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);

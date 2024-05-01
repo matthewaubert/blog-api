@@ -138,5 +138,5 @@ To do:
 - [x] Clean up, remove console.logs
 - [x] Enable admins to update `user` fields
 - [x] Write about query params in `GET` endpoints
-- [ ] Turn off MongoDB document versioning?
+- [ ] Prep for deployment
 - [ ] Deploy to Fly.io
