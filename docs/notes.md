@@ -134,7 +134,7 @@ To do:
 - [x] Write README first draft
 - [x] Write README instructions for login endpoint
 - [x] Write about error messages in README
-- [ ] Change JWT expiration
+- [x] Change JWT expiration
 - [ ] Clean up, remove console.logs
 - [ ] Turn off MongoDB document versioning?
 - [ ] Deploy to Fly.io

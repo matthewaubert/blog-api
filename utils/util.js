@@ -10,7 +10,7 @@ exports.issueJwt = (user) =>
   jwt.sign(
     { user }, // payload
     process.env.JWT_SECRET, // secret key
-    { expiresIn: '1h' }, // options
+    { expiresIn: '24h' }, // options
   );
 
 /**
