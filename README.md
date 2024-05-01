@@ -2,6 +2,8 @@
 
 A RESTful API utilizing JWT authentication to power a blogging platform.
 
+**Live link to the API: https://blog-api-ma.fly.dev/**
+
 ## Key Features
 
 - **RESTful Architecture:** This API maintains the principles of RESTful architecture, ensuring that resources are easily accessible in a consistent format, and enabling efficient communication between client and server.
@@ -25,20 +27,20 @@ You can obtain resources from the API using various means. For example:
 
 - JavaScript Fetch API
   ```javascript
-  fetch('http://<domain-name>/api/posts')
+  fetch('https://blog-api-ma.fly.dev/api/posts')
     .then((res) => res.json())
     .then((json) => console.log(json));
   ```
 - Postman
   ```
-  GET http://<domain-name>/api/posts
+  GET https://blog-api-ma.fly.dev/api/posts
   ```
 - cURL
   ```
-  curl http://<domain-name>/api/posts
+  curl https://blog-api-ma.fly.dev/api/posts
   ```
 
-### Obtain JWT via `login` Route
+### Obtain JWT via `login` route
 
 Depending on the resource, you may need to attach a valid JSON web token (JWT) in the `Authorization` header with the proper authorization in the payload. e.g. `Authorization: Bearer <json-web-token>`
 

@@ -11,6 +11,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 
 const app = express();
+app.set('trust proxy', 2);
 
 // set up rate limiter
 const rateLimit = require('express-rate-limit');
