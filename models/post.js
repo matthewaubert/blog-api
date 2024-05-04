@@ -10,7 +10,11 @@ const PostSchema = new Schema(
     isPublished: { type: Boolean, required: true, default: false }, // whether Post has been published
     category: { type: Schema.Types.ObjectId, ref: 'Category' },
     tags: [{ type: String, lowercase: true }], // array of tags
-    // imgId: { type: String }, // TO DO: cover photo
+    displayImg: {
+      url: { type: String },
+      attribution: { type: String },
+      source: { type: String },
+    },
   },
   { timestamps: true }, // https://mongoosejs.com/docs/timestamps.html
 );

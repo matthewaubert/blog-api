@@ -94,6 +94,22 @@ const validationChainPostPut = [
     // check that `tags` is an array of strings
     .isArray()
     .customSanitizer((values) => values.map((value) => encode(value))),
+  body('displayImg')
+    .optional()
+    .isObject()
+    .customSanitizer((value) => {
+      const displayImg = {};
+      if (value.url) {
+        displayImg.url = value.url.trim();
+      }
+      if (value.attribution) {
+        displayImg.attribution = encode(value.attribution.trim());
+      }
+      if (value.source) {
+        displayImg.source = encode(value.source.trim());
+      }
+      return displayImg;
+    }),
 ];
 
 // POST (create) a new Post
@@ -119,7 +135,11 @@ exports.post = [
       isPublished: req.body.isPublished,
       category: req.body.category,
       tags: req.body.tags,
-      // TO DO: imgId (cover photo)
+      displayImg: {
+        url: req.body.displayImg?.url,
+        attribution: req.body.displayImg?.attribution,
+        source: req.body.displayImg?.source,
+      },
     });
 
     // if validation errors: send Post and errors back as JSON
@@ -166,7 +186,11 @@ exports.put = [
       isPublished: req.body.isPublished,
       category: req.body.category,
       tags: req.body.tags,
-      // TO DO: imgId (cover photo)
+      displayImg: {
+        url: req.body.displayImg?.url,
+        attribution: req.body.displayImg?.attribution,
+        source: req.body.displayImg?.source,
+      },
       _id: req.params.id, // this is required, or a new ID will be assigned!
     });
 
@@ -238,13 +262,31 @@ exports.patch = [
     // check that `tags` is an array of strings
     .isArray()
     .customSanitizer((values) => values.map((value) => encode(value))),
+  body('displayImg')
+    .optional()
+    .isObject()
+    .customSanitizer((value) => {
+      const displayImg = {};
+      if (value.url) {
+        displayImg.url = value.url.trim();
+      }
+      if (value.attribution) {
+        displayImg.attribution = encode(value.attribution.trim());
+      }
+      if (value.source) {
+        displayImg.source = encode(value.source.trim());
+      }
+      return displayImg;
+    }),
 
   asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
 
     const postFields = {};
-    const postSchemaPaths = Object.keys(Post.schema.paths);
+    const postSchemaPaths = Object.keys(Post.schema.paths).map(
+      (path) => path.split('.')[0], // just use the part of the path before the dot
+    );
 
     // get post fields to update from body
     await Promise.all(
@@ -266,6 +308,20 @@ exports.patch = [
             case 'user':
               if (req.authData.user.isAdmin) postFields.user = req.body.user;
               break;
+            case 'displayImg': {
+              const { displayImg } = req.body;
+              postFields.displayImg = {};
+              if (displayImg.url) {
+                postFields.displayImg.url = displayImg.url;
+              }
+              if (displayImg.attribution) {
+                postFields.displayImg.attribution = displayImg.attribution;
+              }
+              if (displayImg.source) {
+                postFields.displayImg.source = displayImg.source;
+              }
+              break;
+            }
             default:
               postFields[field] = req.body[field];
           }
