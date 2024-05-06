@@ -58,7 +58,7 @@ const validationChainPostPut = [
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
-  body('text', 'Text must not be empty.')
+  body('content', 'Content must not be empty.')
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
@@ -125,7 +125,7 @@ exports.post = [
     const post = new Post({
       title: req.body.title,
       slug: await slugify(req.body.title, 'post'),
-      text: req.body.text,
+      content: req.body.content,
       // if user is an admin and supplied `user` field, use it;
       // else, use JWT payload user id
       user:
@@ -176,7 +176,7 @@ exports.put = [
     const post = new Post({
       title: req.body.title,
       slug: await slugify(req.body.title, 'post', req.params.id),
-      text: req.body.text,
+      content: req.body.content,
       // if user is an admin and supplied `user` field, use it;
       // else, use JWT payload user id
       user:
@@ -226,7 +226,7 @@ exports.patch = [
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
-  body('text')
+  body('content')
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),

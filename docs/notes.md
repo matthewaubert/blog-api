@@ -138,5 +138,10 @@ To do:
 - [x] Clean up, remove console.logs
 - [x] Enable admins to update `user` fields
 - [x] Write about query params in `GET` endpoints
-- [ ] Prep for deployment
-- [ ] Deploy to Fly.io
+- [x] Prep for deployment
+- [x] Deploy to Fly.io
+
+## 5/4/24
+
+To do:
+- [x] Add `displayImg` fields to Post

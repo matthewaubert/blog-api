@@ -87,7 +87,7 @@ e.g. `GET /api/posts` will return:
 This resource supports any combination of the following query parameters
 - `sort` to sort resource instances by a field in ascending or descending order
   - e.g. `GET /api/posts?sort[title]=asc` will sort Post resource instances by title in ascending order
-  - e.g. `GET /api/posts?sort[text]=desc` will sort Post resource instances by text in descending order
+  - e.g. `GET /api/posts?sort[content]=desc` will sort Post resource instances by content in descending order
   - Note: By default, resource instances are sorted by ID in ascending order
 - `offset` to skip resource instances
   - e.g. `GET /api/posts?offset=2` will skip the first 2 Post resource instances and return the rest
@@ -124,7 +124,7 @@ e.g. `POST /api/posts` with the following body
 ```json
 {
   "title": "New Post",
-  "text": "This is the text of a new post!",
+  "content": "This is the content of a new post!",
   "tags": ["new", "post"]
 }
 ```
@@ -136,7 +136,7 @@ will return:
   "data": {
     "title": "New Post",
     "slug": "new-post",
-    "text": "This is the text of a new post!",
+    "content": "This is the content of a new post!",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
     "tags": ["new", "post"],
@@ -157,7 +157,7 @@ e.g. `PUT /api/posts/662ab91421be18d008e14500` with the following body
 ```json
 {
   "title": "New Post Replaced",
-  "text": "This is the text of a replaced post!",
+  "content": "This is the content of a replaced post!",
   "tags": ["replaced", "post"]
 }
 ```
@@ -170,7 +170,7 @@ will return:
     "_id": "662ab91421be18d008e14500",
     "title": "New Post Replaced",
     "slug": "new-post-replaced",
-    "text": "This is the text of a replaced post!",
+    "content": "This is the content of a replaced post!",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
     "tags": ["replaced", "post"],
@@ -199,7 +199,7 @@ will return:
     "_id": "662ab91421be18d008e14500",
     "title": "New Post Replaced, edited",
     "slug": "new-post-replaced-edited",
-    "text": "This is the text of a replaced post!",
+    "content": "This is the content of a replaced post!",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
     "tags": ["replaced", "post"],
@@ -222,7 +222,7 @@ e.g. `DELETE /api/posts/662ab91421be18d008e14500` will return:
     "_id": "662ab91421be18d008e14500",
     "title": "New Post Replaced, edited",
     "slug": "new-post-replaced-edited",
-    "text": "This is the text of a replaced post!",
+    "content": "This is the content of a replaced post!",
     "user": {
       "_id": "661d55e453a14e1c7458e23a",
       "firstName": "Sam",
@@ -258,15 +258,15 @@ e.g. `POST /api/posts` without a body will return:
     {
       "type": "field",
       "value": "",
-      "msg": "Text must not be empty.",
-      "path": "text",
+      "msg": "Content must not be empty.",
+      "path": "content",
       "location": "body"
     }
   ],
   "data": {
     "title": "",
     "slug": "",
-    "text": "",
+    "content": "",
     "user": "661d55e453a14e1c7458e23a",
     "isPublished": false,
     "tags": [],
