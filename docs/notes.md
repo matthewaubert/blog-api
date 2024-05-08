@@ -155,5 +155,5 @@ To do:
 
 To do:
 - [ ] Modify API endpoints to support querying resources by slug
-  - [ ] First change `validateIdParam` middleware and related User, Post, and Category controllers
+  - [x] First change `validateIdParam` middleware and related User, Post, and Category controllers
   - [ ] Change `validatePostIdParam` and `validateCommentIdParam` middlewares and related Comment controllers

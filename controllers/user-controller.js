@@ -30,13 +30,18 @@ exports.getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// GET a single User
+// GET a single User by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // get User w/ `_id` that matches `req.params.id`
-  const user = await User.findById(req.params.id).exec();
+  // create query obj based on request param
+  const query = req.validObjectId
+    ? { _id: req.params.id }
+    : { slug: req.params.id };
+
+  // get User w/ `_id` or `slug` that matches `req.params.id`
+  const user = await User.findOne(query).exec();
 
   // if User not found: throw error
-  if (!user) return next(createError(404, 'User not found'));
+  if (!user) return next(createError(404, `User '${req.params.id}' not found`));
 
   res.json({
     success: true,
@@ -134,7 +139,7 @@ exports.post = [
   }),
 ];
 
-// PUT (fully replace) a User
+// PUT (fully replace) a User by id or slug
 exports.put = [
   // validate and sanitize User fields
   ...validationChainPostPut,
@@ -195,7 +200,7 @@ exports.put = [
   }),
 ];
 
-// PATCH (partially update) a User
+// PATCH (partially update) a User by id or slug
 exports.patch = [
   // validate and sanitize User fields
   body('firstName')
@@ -311,7 +316,7 @@ exports.patch = [
   }),
 ];
 
-// DELETE a User
+// DELETE a User by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete User w/ `_id` that matches `req.params.id`
   const user = await User.findByIdAndDelete(req.params.id).exec();

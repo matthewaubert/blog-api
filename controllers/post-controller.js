@@ -34,10 +34,15 @@ exports.getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// GET a single Post
+// GET a single Post by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // get Post w/ `_id` that matches `req.params.id`
-  const post = await Post.findById(req.params.id)
+  // create query obj based on request param
+  const query = req.validObjectId
+    ? { _id: req.params.id }
+    : { slug: req.params.id };
+
+  // get Post w/ `_id` or `slug` that matches `req.params.id`
+  const post = await Post.findOne(query)
     .populate('user', 'firstName lastName username slug')
     .populate('category')
     .exec();
@@ -163,7 +168,7 @@ exports.post = [
   }),
 ];
 
-// PUT (fully replace) a Post
+// PUT (fully replace) a Post by id or slug
 exports.put = [
   // validate and sanitize Post fields
   ...validationChainPostPut,
@@ -219,7 +224,7 @@ exports.put = [
   }),
 ];
 
-// PATCH (partially update) a Post
+// PATCH (partially update) a Post by id or slug
 exports.patch = [
   // validate and sanitize Post fields
   body('title')
@@ -352,7 +357,7 @@ exports.patch = [
   }),
 ];
 
-// DELETE a Post
+// DELETE a Post by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete Post w/ `_id` that matches `req.params.id`
   const post = await Post.findByIdAndDelete(req.params.id)

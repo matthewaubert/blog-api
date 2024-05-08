@@ -33,7 +33,7 @@ router.get('/', (req, res) => {
 // GET all Users
 router.get('/users', verifyToken, isAdmin, userController.getAll);
 
-// GET a single User
+// GET a single User by id or slug
 router.get(
   '/users/:id',
   verifyToken,
@@ -45,7 +45,7 @@ router.get(
 // POST (create) a new User
 router.post('/users', userController.post);
 
-// PUT (fully replace) a User
+// PUT (fully replace) a User by id or slug
 router.put(
   '/users/:id',
   verifyToken,
@@ -54,7 +54,7 @@ router.put(
   userController.put,
 );
 
-// PATCH (partially update) a User
+// PATCH (partially update) a User by id or slug
 router.patch(
   '/users/:id',
   verifyToken,
@@ -63,7 +63,7 @@ router.patch(
   userController.patch,
 );
 
-// DELETE a User
+// DELETE a User by id or slug
 router.delete(
   '/users/:id',
   verifyToken,
@@ -77,13 +77,13 @@ router.delete(
 // GET all Posts
 router.get('/posts', postController.getAll);
 
-// GET a single Post
+// GET a single Post by id or slug
 router.get('/posts/:id', validateIdParam, postController.getOne);
 
 // POST (create) a new Post
 router.post('/posts', verifyToken, isVerified, postController.post);
 
-// PUT (fully replace) a Post
+// PUT (fully replace) a Post by id or slug
 router.put(
   '/posts/:id',
   verifyToken,
@@ -92,7 +92,7 @@ router.put(
   postController.put,
 );
 
-// PATCH (partially update) a Post
+// PATCH (partially update) a Post by id or slug
 router.patch(
   '/posts/:id',
   verifyToken,
@@ -101,7 +101,7 @@ router.patch(
   postController.patch,
 );
 
-// DELETE a Post
+// DELETE a Post by id or slug
 router.delete(
   '/posts/:id',
   verifyToken,
@@ -171,13 +171,13 @@ router.delete(
 // GET all Categories
 router.get('/categories', categoryController.getAll);
 
-// GET a single Category
+// GET a single Category by id or slug
 router.get('/categories/:id', validateIdParam, categoryController.getOne);
 
 // POST (create) a new Category
 router.post('/categories', verifyToken, isVerified, categoryController.post);
 
-// PUT (fully replace) a Category
+// PUT (fully replace) a Category by id or slug
 router.put(
   '/categories/:id',
   verifyToken,
@@ -186,7 +186,7 @@ router.put(
   categoryController.put,
 );
 
-// PATCH (partially update) a Category
+// PATCH (partially update) a Category by id or slug
 router.patch(
   '/categories/:id',
   verifyToken,
@@ -195,7 +195,7 @@ router.patch(
   categoryController.patch,
 );
 
-// DELETE a Category
+// DELETE a Category by id or slug
 router.delete(
   '/categories/:id',
   verifyToken,

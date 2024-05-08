@@ -29,10 +29,15 @@ exports.getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// GET a single Category
+// GET a single Category by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
+  // create query obj based on request param
+  const query = req.validObjectId
+    ? { _id: req.params.id }
+    : { slug: req.params.id };
+
   // get Category w/ `_id` that matches `req.params.id`
-  const category = await Category.findById(req.params.id).exec();
+  const category = await Category.findOne(query).exec();
 
   // if Category not found: throw error
   if (!category) return next(createError(404, 'Category not found'));
@@ -100,7 +105,7 @@ exports.post = [
   }),
 ];
 
-// PUT (fully replace) a Category
+// PUT (fully replace) a Category by id or slug
 exports.put = [
   // validate and sanitize Category fields
   ...validationChainPostPut,
@@ -142,7 +147,7 @@ exports.put = [
   }),
 ];
 
-// PATCH (partially update) a Category
+// PATCH (partially update) a Category by id or slug
 exports.patch = [
   // validate and sanitize Category fields
   body('name')
@@ -215,7 +220,7 @@ exports.patch = [
   }),
 ];
 
-// DELETE a Category
+// DELETE a Category by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete Category w/ `_id` that matches `req.params.id`
   const category = await Category.findByIdAndDelete(req.params.id).exec();
