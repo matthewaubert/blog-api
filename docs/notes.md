@@ -145,3 +145,15 @@ To do:
 
 To do:
 - [x] Add `displayImg` fields to Post
+
+## 5/5/24
+
+To do:
+- [x] Change post.text field to post.content
+
+## 5/7/24
+
+To do:
+- [ ] Modify API endpoints to support querying resources by slug
+  - [ ] First change `validateIdParam` middleware and related User, Post, and Category controllers
+  - [ ] Change `validatePostIdParam` and `validateCommentIdParam` middlewares and related Comment controllers

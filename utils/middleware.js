@@ -5,17 +5,15 @@ const createError = require('http-errors'); // https://www.npmjs.com/package/htt
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 
 /**
- * Express middleware: throw error if `req.params.id` is an invalid MongoDB object id
+ * Express middleware: set `req.validObjectId` property, informing whether
+ * user-provided id `req.params.id` is a valid MongoDB object id
  * @param {object} req - Express `request` object
  * @param {object} res - Express `response` object
  * @param {function} next - Express `next` function
  * @returns {undefined}
  */
 exports.validateIdParam = (req, res, next) => {
-  // if invalid id given: throw error
-  if (!isValidObjectId(req.params.id))
-    return next(createError(404, `Invalid id: ${req.params.id}`));
-
+  req.validObjectId = isValidObjectId(req.params.id);
   return next();
 };
 
