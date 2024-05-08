@@ -31,16 +31,14 @@ exports.getAll = asyncHandler(async (req, res) => {
 
 // GET a single Category by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // create query obj based on request param
-  const query = req.validObjectId
-    ? { _id: req.params.id }
-    : { slug: req.params.id };
-
   // get Category w/ `_id` that matches `req.params.id`
-  const category = await Category.findOne(query).exec();
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const category = await Category.findOne(req.mongoDbQuery).exec();
 
   // if Category not found: throw error
-  if (!category) return next(createError(404, 'Category not found'));
+  if (!category) {
+    return next(createError(404, `Category '${req.params.id}' not found`));
+  }
 
   res.json({
     success: true,
@@ -58,7 +56,11 @@ const validationChainPostPut = [
     // check that category name isn't already being used
     .custom(async (value, { req }) => {
       const category = await Category.findOne({ name: value }).exec();
-      if (category && category.id !== req.params.id)
+      if (
+        category &&
+        category.id !== req.params.id &&
+        category.slug !== req.params.id
+      )
         throw Error('Category name already exists.');
     })
     .customSanitizer((value) => encode(value)),
@@ -114,12 +116,16 @@ exports.put = [
     // extract validation errors from request
     const errors = validationResult(req);
 
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldCategory = await Category.findOne(req.mongoDbQuery, 'slug');
+
     // create a Category object w/ escaped & trimmed data
     const category = new Category({
       name: req.body.name,
-      slug: await slugify(req.body.name, 'category', req.params.id),
+      slug: await slugify(req.body.name, 'category', oldCategory.id),
       description: req.body.description,
-      _id: req.params.id, // this is required, or a new ID will be assigned!
+      _id: oldCategory.id, // this is required, or a new ID will be assigned!
     });
 
     // if validation errors: send Category and errors back as JSON
@@ -133,7 +139,7 @@ exports.put = [
     } else {
       // data from form is valid. Save Category and send back as JSON.
       const updatedCategory = await Category.findOneAndReplace(
-        { _id: req.params.id }, // filter
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
         category, // replacement
         { returnDocument: 'after' }, // options
       );
@@ -156,7 +162,11 @@ exports.patch = [
     // check that category name isn't already being used
     .custom(async (value, { req }) => {
       const category = await Category.findOne({ name: value }).exec();
-      if (category && category.id !== req.params.id)
+      if (
+        category &&
+        category.id !== req.params.id &&
+        category.slug !== req.params.id
+      )
         throw Error('Category name already exists.');
     })
     .customSanitizer((value) => encode(value)),
@@ -168,6 +178,10 @@ exports.patch = [
   asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
+
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldCategory = await Category.findOne(req.mongoDbQuery, 'slug');
 
     const categoryFields = {};
     const categorySchemaPaths = Object.keys(Category.schema.paths);
@@ -185,7 +199,7 @@ exports.patch = [
               categoryFields.slug = await slugify(
                 req.body.name,
                 'category',
-                req.params.id,
+                oldCategory.id,
               );
               break;
             default:
@@ -205,10 +219,10 @@ exports.patch = [
       });
     } else {
       // data from form is valid. Save Category and send back as JSON.
-      const category = await Category.findByIdAndUpdate(
-        req.params.id,
-        categoryFields,
-        { new: true },
+      const category = await Category.findOneAndUpdate(
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+        categoryFields, // update
+        { new: true }, // options
       ).exec();
 
       res.json({
@@ -223,10 +237,13 @@ exports.patch = [
 // DELETE a Category by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete Category w/ `_id` that matches `req.params.id`
-  const category = await Category.findByIdAndDelete(req.params.id).exec();
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const category = await Category.findOneAndDelete(req.mongoDbQuery).exec();
 
   // if Category not found: throw error
-  if (!category) return next(createError(404, 'Category not found'));
+  if (!category) {
+    return next(createError(404, `Category '${req.params.id}' not found`));
+  }
 
   res.json({
     success: true,

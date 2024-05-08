@@ -156,4 +156,5 @@ To do:
 To do:
 - [ ] Modify API endpoints to support querying resources by slug
   - [x] First change `validateIdParam` middleware and related User, Post, and Category controllers
+  - [x] Refactor `validateIdParam` to set `req.mongoDbQuery` obj. Then refactor related User, Post, and Category controllers.
   - [ ] Change `validatePostIdParam` and `validateCommentIdParam` middlewares and related Comment controllers

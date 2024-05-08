@@ -36,19 +36,15 @@ exports.getAll = asyncHandler(async (req, res) => {
 
 // GET a single Post by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // create query obj based on request param
-  const query = req.validObjectId
-    ? { _id: req.params.id }
-    : { slug: req.params.id };
-
   // get Post w/ `_id` or `slug` that matches `req.params.id`
-  const post = await Post.findOne(query)
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const post = await Post.findOne(req.mongoDbQuery)
     .populate('user', 'firstName lastName username slug')
     .populate('category')
     .exec();
 
   // if Post not found: throw error
-  if (!post) return next(createError(404, 'Post not found'));
+  if (!post) return next(createError(404, `Post '${req.params.id}' not found`));
 
   res.json({
     success: true,
@@ -177,10 +173,14 @@ exports.put = [
     // extract validation errors from request
     const errors = validationResult(req);
 
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldPost = await Post.findOne(req.mongoDbQuery, 'slug');
+
     // create a Post object w/ escaped & trimmed data
     const post = new Post({
       title: req.body.title,
-      slug: await slugify(req.body.title, 'post', req.params.id),
+      slug: await slugify(req.body.title, 'post', oldPost.id),
       content: req.body.content,
       // if user is an admin and supplied `user` field, use it;
       // else, use JWT payload user id
@@ -196,7 +196,7 @@ exports.put = [
         attribution: req.body.displayImg?.attribution,
         source: req.body.displayImg?.source,
       },
-      _id: req.params.id, // this is required, or a new ID will be assigned!
+      _id: oldPost.id, // this is required, or a new ID will be assigned!
     });
 
     // if validation errors: send Post and errors back as JSON
@@ -210,10 +210,10 @@ exports.put = [
     } else {
       // data from form is valid. Save Post and send back as JSON.
       const updatedPost = await Post.findOneAndReplace(
-        { _id: req.params.id }, // filter
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
         post, // replacement
         { returnDocument: 'after' }, // options
-      );
+      ).exec();
 
       res.json({
         success: true,
@@ -288,6 +288,10 @@ exports.patch = [
     // extract validation errors from request
     const errors = validationResult(req);
 
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldPost = await Post.findOne(req.mongoDbQuery, 'slug');
+
     const postFields = {};
     const postSchemaPaths = Object.keys(Post.schema.paths).map(
       (path) => path.split('.')[0], // just use the part of the path before the dot
@@ -306,7 +310,7 @@ exports.patch = [
               postFields.slug = await slugify(
                 req.body.title,
                 'post',
-                req.params.id,
+                oldPost.id,
               );
               break;
             // if user is an admin and supplied `user` field, use it
@@ -344,9 +348,11 @@ exports.patch = [
       });
     } else {
       // data from form is valid. Save Post and send back as JSON.
-      const post = await Post.findByIdAndUpdate(req.params.id, postFields, {
-        new: true,
-      }).exec();
+      const post = await Post.findOneAndUpdate(
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+        postFields, // update
+        { new: true }, // options
+      ).exec();
 
       res.json({
         success: true,
@@ -360,13 +366,14 @@ exports.patch = [
 // DELETE a Post by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete Post w/ `_id` that matches `req.params.id`
-  const post = await Post.findByIdAndDelete(req.params.id)
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const post = await Post.findOneAndDelete(req.mongoDbQuery)
     .populate('user', 'firstName lastName username slug')
     .populate('category')
     .exec();
 
   // if Post not found: throw error
-  if (!post) return next(createError(404, 'Post not found'));
+  if (!post) return next(createError(404, `Post '${req.params.id}' not found`));
 
   res.json({
     success: true,

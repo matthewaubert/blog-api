@@ -55,9 +55,11 @@ exports.isAdmin = (req, res, next) => {
       });
 };
 
-// ensure that authenticated user's id is same as `req.params.id`
+// ensure that authenticated user's id or slug is same as `req.params.id`
 exports.isCorrectUser = (req, res, next) => {
-  req.authData.user.isAdmin || req.authData.user._id === req.params.id
+  req.authData.user.isAdmin ||
+  req.authData.user._id === req.params.id ||
+  req.authData.user.slug === req.params.id
     ? next()
     : res.status(403).json({
         success: false,
@@ -69,10 +71,9 @@ exports.isCorrectUser = (req, res, next) => {
 exports.isPostAuthor = asyncHandler(async (req, res, next) => {
   if (req.authData.user.isAdmin) return next();
 
-  const post = await Post.findById(req.params.id, 'user').exec();
-
+  const post = await Post.findOne(req.mongoDbQuery, 'user').exec();
   // if Post not found: throw error
-  if (!post) return next(createError(404, 'Post not found'));
+  if (!post) return next(createError(404, `Post '${req.params.id}' not found`));
 
   req.authData.user._id === post.user.toString()
     ? next()
