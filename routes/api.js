@@ -119,7 +119,7 @@ router.get(
   commentController.getAll,
 );
 
-// GET a single Comment
+// GET a single Comment by id
 router.get(
   '/posts/:postId/comments/:commentId',
   validatePostIdParam,
@@ -136,7 +136,7 @@ router.post(
   commentController.post,
 );
 
-// PUT (fully replace) a Comment
+// PUT (fully replace) a Comment by id
 router.put(
   '/posts/:postId/comments/:commentId',
   verifyToken,
@@ -146,7 +146,7 @@ router.put(
   commentController.put,
 );
 
-// PATCH (partially update) a Comment
+// PATCH (partially update) a Comment by id
 router.patch(
   '/posts/:postId/comments/:commentId',
   verifyToken,
@@ -156,7 +156,7 @@ router.patch(
   commentController.patch,
 );
 
-// DELETE a Comment
+// DELETE a Comment by id
 router.delete(
   '/posts/:postId/comments/:commentId',
   verifyToken,

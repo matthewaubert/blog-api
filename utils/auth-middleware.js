@@ -87,10 +87,9 @@ exports.isPostAuthor = asyncHandler(async (req, res, next) => {
 exports.isCommentAuthor = asyncHandler(async (req, res, next) => {
   if (req.authData.user.isAdmin) return next();
 
-  const comment = await Comment.findById(req.params.id, 'user').exec();
-
+  const comment = await Comment.findOne(req.mongoDbQuery, 'user').exec();
   // if Comment not found: throw error
-  if (!comment) return next(createError(404, 'Comment not found'));
+  if (!comment) return next(createError(404, `Comment '${req.params.id}' not found`));
 
   req.authData.user._id === comment.user.toString()
     ? next()
