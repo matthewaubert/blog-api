@@ -5,15 +5,21 @@ const createError = require('http-errors'); // https://www.npmjs.com/package/htt
 const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 
 /**
- * Express middleware: set `req.validObjectId` property, informing whether
- * user-provided id `req.params.id` is a valid MongoDB object id
+ * Express middleware: set `req.mongoDbQuery` property, an object used to query
+ * the MongoDB database, based on whether client provided an ID or slug in `req.params.id`
+ * - e.g. if client provided an id: `{ _id: 661d8cf51c7292a1008ffb6a }`
+ * - e.g. if client provided a slug: `{ slug: food }`
  * @param {object} req - Express `request` object
  * @param {object} res - Express `response` object
  * @param {function} next - Express `next` function
  * @returns {undefined}
  */
 exports.validateIdParam = (req, res, next) => {
-  req.validObjectId = isValidObjectId(req.params.id);
+  // create MongoDB query obj based on request param
+  req.mongoDbQuery = isValidObjectId(req.params.id)
+    ? { _id: req.params.id }
+    : { slug: req.params.id };
+
   return next();
 };
 
