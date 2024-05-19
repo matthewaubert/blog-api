@@ -131,7 +131,6 @@ router.get(
 router.post(
   '/posts/:postId/comments',
   verifyToken,
-  isVerified,
   validatePostIdParam,
   commentController.post,
 );

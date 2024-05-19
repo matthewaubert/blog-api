@@ -111,11 +111,15 @@ exports.post = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       await comment.save();
+      const populatedComment = await Comment.findById(comment._id)
+        .populate('user', 'firstName lastName username slug')
+        .populate('post', 'title slug')
+        .exec();
 
       res.json({
         success: true,
-        message: `Comment '${comment.id}' saved to database`,
-        data: comment,
+        message: `Comment '${populatedComment.id}' saved to database`,
+        data: populatedComment,
       });
     }
   }),
