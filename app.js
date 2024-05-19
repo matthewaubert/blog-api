@@ -17,7 +17,7 @@ const app = express();
 const rateLimit = require('express-rate-limit'); // https://express-rate-limit.mintlify.app/quickstart/usage
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 min
-  max: 20, // limit each IP to 20 requests per `window`
+  max: 60, // limit each IP to 60 requests per `window`
 });
 app.use(limiter); // apply rate limiter to all requests
 
