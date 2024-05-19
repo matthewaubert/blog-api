@@ -8,16 +8,17 @@ const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const apiRouter = require('./routes/api');
 const compression = require('compression');
-const helmet = require('helmet');
+const helmet = require('helmet'); // https://helmetjs.github.io/
+const cors = require('cors'); // https://expressjs.com/en/resources/middleware/cors.html
 
 const app = express();
 app.set('trust proxy', 2);
 
 // set up rate limiter
-const rateLimit = require('express-rate-limit');
+const rateLimit = require('express-rate-limit'); // https://express-rate-limit.mintlify.app/quickstart/usage
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 min
-  max: 20, // limit each IP to 20 requests per `window`
+  max: 60, // limit each IP to 60 requests per `window`
 });
 app.use(limiter); // apply rate limiter to all requests
 
@@ -38,6 +39,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(compression()); // compress all routes
+app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'public')));
 

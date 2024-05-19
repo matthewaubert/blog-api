@@ -30,13 +30,14 @@ exports.getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// GET a single User
+// GET a single User by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // get User w/ `_id` that matches `req.params.id`
-  const user = await User.findById(req.params.id).exec();
+  // get User w/ `_id` or `slug` that matches `req.params.id`
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const user = await User.findOne(req.mongoDbQuery).exec();
 
   // if User not found: throw error
-  if (!user) return next(createError(404, 'User not found'));
+  if (!user) return next(createError(404, `User '${req.params.id}' not found`));
 
   res.json({
     success: true,
@@ -62,7 +63,7 @@ const validationChainPostPut = [
     // check that username isn't already being used
     .custom(async (value, { req }) => {
       const user = await User.findOne({ username: value }).exec();
-      if (user && user.id !== req.params.id)
+      if (user && user.id !== req.params.id && user.slug !== req.params.id)
         throw new Error('Username already in use.');
     })
     .customSanitizer((value) => encode(value)),
@@ -75,7 +76,7 @@ const validationChainPostPut = [
     // check that email isn't already being used
     .custom(async (value, { req }) => {
       const user = await User.findOne({ email: value }).exec();
-      if (user && user.id !== req.params.id)
+      if (user && user.id !== req.params.id && user.slug !== req.params.id)
         throw new Error('Email already in use.');
     })
     .customSanitizer((value) => encode(value)),
@@ -134,7 +135,7 @@ exports.post = [
   }),
 ];
 
-// PUT (fully replace) a User
+// PUT (fully replace) a User by id or slug
 exports.put = [
   // validate and sanitize User fields
   ...validationChainPostPut,
@@ -143,7 +144,8 @@ exports.put = [
     .trim()
     // check that `currentPassword` matches password in database
     .custom(async (value, { req }) => {
-      const user = await User.findById(req.params.id).exec();
+      // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+      const user = await User.findOne(req.mongoDbQuery, 'password').exec();
       const matches = user ? await bcrypt.compare(value, user.password) : false;
       if (!matches) throw new Error('Incorrect current password');
     }),
@@ -157,15 +159,19 @@ exports.put = [
       // if err, skip to next in middleware chain
       if (err) return next(err);
 
+      // don't know whether client will provide id or slug, so need to ensure we have both
+      // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+      const oldUser = await User.findOne(req.mongoDbQuery, 'slug');
+
       // create a User object w/ escaped & trimmed data
       const user = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         username: req.body.username,
-        slug: await slugify(req.body.username, 'user', req.params.id),
+        slug: await slugify(req.body.username, 'user', oldUser.id),
         email: req.body.email,
         password: hashedPassword,
-        _id: req.params.id, // this is required, or a new ID will be assigned!
+        _id: oldUser.id, // this is required, or a new ID will be assigned!
       });
 
       // if validation errors: send User and errors back as JSON
@@ -179,10 +185,10 @@ exports.put = [
       } else {
         // data from form is valid. Save User, issue new JWT, send both as JSON.
         const updatedUser = await User.findOneAndReplace(
-          { _id: req.params.id }, // filter
+          req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
           user, // replacement
           { returnDocument: 'after' }, // options
-        );
+        ).exec();
 
         res.json({
           success: true,
@@ -195,7 +201,7 @@ exports.put = [
   }),
 ];
 
-// PATCH (partially update) a User
+// PATCH (partially update) a User by id or slug
 exports.patch = [
   // validate and sanitize User fields
   body('firstName')
@@ -212,7 +218,7 @@ exports.patch = [
     // check that username isn't already being used
     .custom(async (value, { req }) => {
       const user = await User.findOne({ username: value }).exec();
-      if (user && user.id !== req.params.id)
+      if (user && user.id !== req.params.id && user.slug !== req.params.id)
         throw new Error('Username already in use.');
     })
     .customSanitizer((value) => encode(value)),
@@ -226,7 +232,7 @@ exports.patch = [
     // check that email isn't already being used
     .custom(async (value, { req }) => {
       const user = await User.findOne({ email: value }).exec();
-      if (user && user.id !== req.params.id)
+      if (user && user.id !== req.params.id && user.slug !== req.params.id)
         throw new Error('Email already in use.');
     })
     .customSanitizer((value) => encode(value)),
@@ -245,7 +251,8 @@ exports.patch = [
     .trim()
     // check that `currentPassword` matches password in database
     .custom(async (value, { req }) => {
-      const user = await User.findById(req.params.id).exec();
+      // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+      const user = await User.findOne(req.mongoDbQuery, 'password').exec();
       const matches = user ? await bcrypt.compare(value, user.password) : false;
       if (!matches) throw new Error('Incorrect current password');
     }),
@@ -253,6 +260,10 @@ exports.patch = [
   asyncHandler(async (req, res, next) => {
     // extract validation errors from request
     const errors = validationResult(req);
+
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldUser = await User.findOne(req.mongoDbQuery, 'slug');
 
     const userFields = {};
     const userSchemaPaths = Object.keys(User.schema.paths);
@@ -270,7 +281,7 @@ exports.patch = [
               userFields.slug = await slugify(
                 req.body.username,
                 'user',
-                req.params.id,
+                oldUser.id,
               );
               break;
             // if updating password, use hash
@@ -297,9 +308,11 @@ exports.patch = [
       });
     } else {
       // data from form is valid. Save User, issue new JWT, send both as JSON.
-      const user = await User.findByIdAndUpdate(req.params.id, userFields, {
-        new: true,
-      }).exec();
+      const user = await User.findOneAndUpdate(
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+        userFields, // update
+        { new: true }, // options
+      ).exec();
 
       res.json({
         success: true,
@@ -311,13 +324,14 @@ exports.patch = [
   }),
 ];
 
-// DELETE a User
+// DELETE a User by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete User w/ `_id` that matches `req.params.id`
-  const user = await User.findByIdAndDelete(req.params.id).exec();
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const user = await User.findOneAndDelete(req.mongoDbQuery).exec();
 
   // if User not found: throw error
-  if (!user) return next(createError(404, 'User not found'));
+  if (!user) return next(createError(404, `User '${req.params.id}' not found`));
 
   res.json({
     success: true,

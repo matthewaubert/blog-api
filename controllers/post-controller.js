@@ -34,16 +34,17 @@ exports.getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// GET a single Post
+// GET a single Post by id or slug
 exports.getOne = asyncHandler(async (req, res, next) => {
-  // get Post w/ `_id` that matches `req.params.id`
-  const post = await Post.findById(req.params.id)
+  // get Post w/ `_id` or `slug` that matches `req.params.id`
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const post = await Post.findOne(req.mongoDbQuery)
     .populate('user', 'firstName lastName username slug')
     .populate('category')
     .exec();
 
   // if Post not found: throw error
-  if (!post) return next(createError(404, 'Post not found'));
+  if (!post) return next(createError(404, `Post '${req.params.id}' not found`));
 
   res.json({
     success: true,
@@ -58,7 +59,7 @@ const validationChainPostPut = [
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
-  body('text', 'Text must not be empty.')
+  body('content', 'Content must not be empty.')
     .trim()
     .isLength({ min: 1 })
     .customSanitizer((value) => encode(value)),
@@ -94,6 +95,22 @@ const validationChainPostPut = [
     // check that `tags` is an array of strings
     .isArray()
     .customSanitizer((values) => values.map((value) => encode(value))),
+  body('displayImg')
+    .optional()
+    .isObject()
+    .customSanitizer((value) => {
+      const displayImg = {};
+      if (value.url) {
+        displayImg.url = value.url.trim();
+      }
+      if (value.attribution) {
+        displayImg.attribution = encode(value.attribution.trim());
+      }
+      if (value.source) {
+        displayImg.source = encode(value.source.trim());
+      }
+      return displayImg;
+    }),
 ];
 
 // POST (create) a new Post
@@ -109,7 +126,7 @@ exports.post = [
     const post = new Post({
       title: req.body.title,
       slug: await slugify(req.body.title, 'post'),
-      text: req.body.text,
+      content: req.body.content,
       // if user is an admin and supplied `user` field, use it;
       // else, use JWT payload user id
       user:
@@ -119,7 +136,11 @@ exports.post = [
       isPublished: req.body.isPublished,
       category: req.body.category,
       tags: req.body.tags,
-      // TO DO: imgId (cover photo)
+      displayImg: {
+        url: req.body.displayImg?.url,
+        attribution: req.body.displayImg?.attribution,
+        source: req.body.displayImg?.source,
+      },
     });
 
     // if validation errors: send Post and errors back as JSON
@@ -143,7 +164,7 @@ exports.post = [
   }),
 ];
 
-// PUT (fully replace) a Post
+// PUT (fully replace) a Post by id or slug
 exports.put = [
   // validate and sanitize Post fields
   ...validationChainPostPut,
@@ -152,11 +173,15 @@ exports.put = [
     // extract validation errors from request
     const errors = validationResult(req);
 
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldPost = await Post.findOne(req.mongoDbQuery, 'slug');
+
     // create a Post object w/ escaped & trimmed data
     const post = new Post({
       title: req.body.title,
-      slug: await slugify(req.body.title, 'post', req.params.id),
-      text: req.body.text,
+      slug: await slugify(req.body.title, 'post', oldPost.id),
+      content: req.body.content,
       // if user is an admin and supplied `user` field, use it;
       // else, use JWT payload user id
       user:
@@ -166,8 +191,12 @@ exports.put = [
       isPublished: req.body.isPublished,
       category: req.body.category,
       tags: req.body.tags,
-      // TO DO: imgId (cover photo)
-      _id: req.params.id, // this is required, or a new ID will be assigned!
+      displayImg: {
+        url: req.body.displayImg?.url,
+        attribution: req.body.displayImg?.attribution,
+        source: req.body.displayImg?.source,
+      },
+      _id: oldPost.id, // this is required, or a new ID will be assigned!
     });
 
     // if validation errors: send Post and errors back as JSON
@@ -181,10 +210,10 @@ exports.put = [
     } else {
       // data from form is valid. Save Post and send back as JSON.
       const updatedPost = await Post.findOneAndReplace(
-        { _id: req.params.id }, // filter
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
         post, // replacement
         { returnDocument: 'after' }, // options
-      );
+      ).exec();
 
       res.json({
         success: true,
@@ -195,14 +224,14 @@ exports.put = [
   }),
 ];
 
-// PATCH (partially update) a Post
+// PATCH (partially update) a Post by id or slug
 exports.patch = [
   // validate and sanitize Post fields
   body('title')
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
-  body('text')
+  body('content')
     .optional()
     .trim()
     .customSanitizer((value) => encode(value)),
@@ -238,13 +267,35 @@ exports.patch = [
     // check that `tags` is an array of strings
     .isArray()
     .customSanitizer((values) => values.map((value) => encode(value))),
+  body('displayImg')
+    .optional()
+    .isObject()
+    .customSanitizer((value) => {
+      const displayImg = {};
+      if (value.url) {
+        displayImg.url = value.url.trim();
+      }
+      if (value.attribution) {
+        displayImg.attribution = encode(value.attribution.trim());
+      }
+      if (value.source) {
+        displayImg.source = encode(value.source.trim());
+      }
+      return displayImg;
+    }),
 
   asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
 
+    // don't know whether client will provide id or slug, so need to ensure we have both
+    // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+    const oldPost = await Post.findOne(req.mongoDbQuery, 'slug');
+
     const postFields = {};
-    const postSchemaPaths = Object.keys(Post.schema.paths);
+    const postSchemaPaths = Object.keys(Post.schema.paths).map(
+      (path) => path.split('.')[0], // just use the part of the path before the dot
+    );
 
     // get post fields to update from body
     await Promise.all(
@@ -259,13 +310,27 @@ exports.patch = [
               postFields.slug = await slugify(
                 req.body.title,
                 'post',
-                req.params.id,
+                oldPost.id,
               );
               break;
             // if user is an admin and supplied `user` field, use it
             case 'user':
               if (req.authData.user.isAdmin) postFields.user = req.body.user;
               break;
+            case 'displayImg': {
+              const { displayImg } = req.body;
+              postFields.displayImg = {};
+              if (displayImg.url) {
+                postFields.displayImg.url = displayImg.url;
+              }
+              if (displayImg.attribution) {
+                postFields.displayImg.attribution = displayImg.attribution;
+              }
+              if (displayImg.source) {
+                postFields.displayImg.source = displayImg.source;
+              }
+              break;
+            }
             default:
               postFields[field] = req.body[field];
           }
@@ -283,9 +348,11 @@ exports.patch = [
       });
     } else {
       // data from form is valid. Save Post and send back as JSON.
-      const post = await Post.findByIdAndUpdate(req.params.id, postFields, {
-        new: true,
-      }).exec();
+      const post = await Post.findOneAndUpdate(
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+        postFields, // update
+        { new: true }, // options
+      ).exec();
 
       res.json({
         success: true,
@@ -296,16 +363,17 @@ exports.patch = [
   }),
 ];
 
-// DELETE a Post
+// DELETE a Post by id or slug
 exports.delete = asyncHandler(async (req, res, next) => {
   // delete Post w/ `_id` that matches `req.params.id`
-  const post = await Post.findByIdAndDelete(req.params.id)
+  // (`req.mongoDbQuery` obj set in `validateIdParam` middleware)
+  const post = await Post.findOneAndDelete(req.mongoDbQuery)
     .populate('user', 'firstName lastName username slug')
     .populate('category')
     .exec();
 
   // if Post not found: throw error
-  if (!post) return next(createError(404, 'Post not found'));
+  if (!post) return next(createError(404, `Post '${req.params.id}' not found`));
 
   res.json({
     success: true,

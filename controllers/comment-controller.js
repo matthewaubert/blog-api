@@ -36,20 +36,20 @@ exports.getAll = asyncHandler(async (req, res) => {
   });
 });
 
-// GET a single Comment
+// GET a single Comment by id
 exports.getOne = asyncHandler(async (req, res, next) => {
   // get Comment w/ `_id` that matches `req.params.commentId`
   // and `post` that matches `req.params.postId`
-  const comment = await Comment.findOne({
-    _id: req.params.commentId,
-    post: req.params.postId,
-  })
+  // (`req.mongoDbQuery` obj set in `validateCommentIdParam` middleware)
+  const comment = await Comment.findOne(req.mongoDbQuery)
     .populate('user', 'firstName lastName username slug')
     .populate('post', 'title slug')
     .exec();
 
   // if Comment not found: throw error
-  if (!comment) return next(createError(404, 'Comment not found'));
+  if (!comment) {
+    return next(createError(404, `Comment '${req.params.id}' not found`));
+  }
 
   res.json({
     success: true,
@@ -111,17 +111,21 @@ exports.post = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       await comment.save();
+      const populatedComment = await Comment.findById(comment._id)
+        .populate('user', 'firstName lastName username slug')
+        .populate('post', 'title slug')
+        .exec();
 
       res.json({
         success: true,
-        message: `Comment '${comment.id}' saved to database`,
-        data: comment,
+        message: `Comment '${populatedComment.id}' saved to database`,
+        data: populatedComment,
       });
     }
   }),
 ];
 
-// PUT (fully replace) a Comment
+// PUT (fully replace) a Comment by id
 exports.put = [
   // validate and sanitize Comment fields
   ...validationChainPostPut,
@@ -154,10 +158,10 @@ exports.put = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       const updatedComment = await Comment.findOneAndReplace(
-        { _id: req.params.commentId }, // filter
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateCommentIdParam` middleware)
         comment, // replacement
         { returnDocument: 'after' }, // options
-      );
+      ).exec();
 
       res.json({
         success: true,
@@ -168,7 +172,7 @@ exports.put = [
   }),
 ];
 
-// PATCH (partially update) a Comment
+// PATCH (partially update) a Comment by id
 exports.patch = [
   // validate and sanitize Comment fields
   body('text')
@@ -225,7 +229,7 @@ exports.patch = [
     } else {
       // data from form is valid. Save Comment and send back as JSON.
       const comment = await Comment.findOneAndUpdate(
-        { _id: req.params.commentId, post: req.params.postId }, // filter
+        req.mongoDbQuery, // filter (`req.mongoDbQuery` obj set in `validateCommentIdParam` middleware)
         commentFields, // update
         { new: true }, // options
       ).exec();
@@ -239,20 +243,20 @@ exports.patch = [
   }),
 ];
 
-// DELETE a Comment
+// DELETE a Comment by id
 exports.delete = asyncHandler(async (req, res, next) => {
   // get Comment w/ `_id` that matches `req.params.commentId`
   // and `post` that matches `req.params.postId`
-  const comment = await Comment.findOneAndDelete({
-    _id: req.params.commentId,
-    post: req.params.postId,
-  })
+  // (`req.mongoDbQuery` obj set in `validateCommentIdParam` middleware)
+  const comment = await Comment.findOneAndDelete(req.mongoDbQuery)
     .populate('user', 'firstName lastName username slug')
     .populate('post', 'title slug')
     .exec();
 
   // if Comment not found: throw error
-  if (!comment) return next(createError(404, 'Comment not found'));
+  if (!comment) {
+    return next(createError(404, `Comment '${req.params.id}' not found`));
+  }
 
   res.json({
     success: true,

@@ -138,5 +138,23 @@ To do:
 - [x] Clean up, remove console.logs
 - [x] Enable admins to update `user` fields
 - [x] Write about query params in `GET` endpoints
-- [ ] Prep for deployment
-- [ ] Deploy to Fly.io
+- [x] Prep for deployment
+- [x] Deploy to Fly.io
+
+## 5/4/24
+
+To do:
+- [x] Add `displayImg` fields to Post
+
+## 5/5/24
+
+To do:
+- [x] Change post.text field to post.content
+
+## 5/7/24
+
+To do:
+- [ ] Modify API endpoints to support querying resources by slug
+  - [x] First change `validateIdParam` middleware and related User, Post, and Category controllers
+  - [x] Refactor `validateIdParam` to set `req.mongoDbQuery` obj. Then refactor related User, Post, and Category controllers.
+  - [x] Refactor `validatePostIdParam` and `validateCommentIdParam` middlewares to set `req.mongoDbQuery. Then refactor related Comment controllers.
