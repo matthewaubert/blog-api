@@ -19,6 +19,7 @@ const postController = require('../controllers/post-controller');
 const commentController = require('../controllers/comment-controller');
 const categoryController = require('../controllers/category-controller');
 const loginController = require('../controllers/login-controller');
+const verificationController = require('../controllers/verification-controller');
 
 // API index
 router.get('/', (req, res) => {
@@ -207,5 +208,10 @@ router.delete(
 
 // POST login
 router.post('/login', loginController.post);
+
+/* Verify Email Routes */
+
+// GET email verification
+router.get('/verification', verifyToken, verificationController.get);
 
 module.exports = router;
