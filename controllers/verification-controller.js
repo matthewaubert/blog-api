@@ -1,17 +1,23 @@
 const nodemailer = require('nodemailer'); // https://nodemailer.com/
+const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
 
-exports.get = (req, res) => {
-  const { user } = req.authData;
-
+/**
+ * Generate verification email template to send based on given `name` and `token`.
+ * @param {string} name - name of email recipient
+ * @param {string} token - JWT
+ * @returns {string} HTML email template
+ */
+function generateEmailTemplate(name, token) {
   const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'http://horizons-ma.pages.dev/'
-      : 'http://localhost:5173/';
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:5173/'
+      : 'http://horizons-ma.pages.dev/';
 
-  const url = `${baseUrl}verify-email?token=${req.token}`;
+  const url = `${baseUrl}verify-email?token=${token}`;
   const mailto = 'horizons-support@matthewaubert.com';
-  const outputHtml = `
-    <p>Hi, ${user.firstName}. Thanks for using Horizons!</p>
+
+  return `
+    <p>Hi, ${name}. Thanks for using Horizons!</p>
     <p>
       To verify that this is your email address, <a href="${url}">please click here</a>
       or copy and paste the link below into your browser, and you'll be sent to a page
@@ -19,42 +25,55 @@ exports.get = (req, res) => {
     </p>
     <p>Link: <a href="${url}">${url}</a></p>
     <p>
-      If you have any trouble, please feel free to email us at
+      If you have any trouble, please feel free to email me at
       <a href="mailto:${mailto}">${mailto}</a>
     </p>
-    <p>Sincerely,<br />The Horizons Team</p>
+    <p>Sincerely,<br />Matthew<br />Horizons developer</p>
   `;
+}
 
-  // create reusable transporter object using the default SMTP transport
-  const transporter = nodemailer.createTransport({
-    name: 'mail.matthewaubert.com',
-    host: 'mail.matthewaubert.com',
-    port: 465,
-    secure: true, // Use `true` for port 465, `false` for all other ports
-    auth: {
-      user: 'horizons-noreply@matthewaubert.com',
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: { rejectUnauthorized: false },
+// create reusable transporter object using the default SMTP transport
+const transporter = nodemailer.createTransport({
+  name: 'mail.matthewaubert.com',
+  host: 'mail.matthewaubert.com',
+  port: 465,
+  secure: true, // Use `true` for port 465, `false` for all other ports
+  auth: {
+    user: 'horizons-noreply@matthewaubert.com',
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: { rejectUnauthorized: false },
+});
+
+/**
+ * Send verification email with given `token` to given `user`'s email address.
+ * @param {object} user - `User` object instance with `email` and `firstName` properties
+ * @param {string} token - JWT
+ */
+async function sendVerificationEmail(user, token) {
+  // send mail with defined transport object
+  const info = await transporter.sendMail({
+    from: '"Matthew Aubert" <horizons-noreply@matthewaubert.com>', // sender address
+    to: user.email, // list of receivers
+    subject: 'Horizons Email Verification', // subject line
+    html: generateEmailTemplate(user.firstName, token), // html body
   });
 
-  async function sendVerificationEmail() {
-    // send mail with defined transport object
-    const info = await transporter.sendMail({
-      from: '"Matthew Aubert" <horizons-noreply@matthewaubert.com>', // sender address
-      to: user.email, // list of receivers
-      subject: 'Email Verification', // Subject line
-      html: outputHtml, // html body
+  // e.g. 'Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@matthewaubert.com>'
+  console.log('Message sent:', info.messageId);
+}
+
+// GET email verification
+exports.get = async (req, res, next) => {
+  const { user } = req.authData;
+
+  try {
+    await sendVerificationEmail(user, req.token);
+    res.json({
+      success: true,
+      message: `Verification email sent to ${user.email}`,
     });
-
-    // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
-    console.log('Message sent:', info.messageId);
+  } catch (err) {
+    next(createError(500, 'Failed to send verification email'));
   }
-
-  sendVerificationEmail().catch(console.error);
-
-  res.json({
-    success: true,
-    message: `Verification email sent to ${user.email}`,
-  });
 };
