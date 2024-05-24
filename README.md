@@ -2,6 +2,10 @@
 
 A RESTful API utilizing JWT authentication to power a blogging platform.
 
+**[Click here to view the live site](https://blog-api-ma.fly.dev/api)**
+
+**[Click here to see the GitHub repo for the front end](https://github.com/matthewaubert/blog-client)**
+
 ## Key Features
 
 - **RESTful Architecture:** This API maintains the principles of RESTful architecture, ensuring that resources are easily accessible in a consistent format, and enabling efficient communication between client and server.
