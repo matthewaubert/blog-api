@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const nodemailer = require('nodemailer'); // https://nodemailer.com/
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
-const jwt = require('jsonwebtoken'); // https://github.com/auth0/node-jsonwebtoken#readme
+const asyncHandler = require('express-async-handler'); // https://www.npmjs.com/package/express-async-handler
 const { issueJwt } = require('../utils/util');
 
 /**
@@ -82,25 +82,21 @@ exports.post = async (req, res, next) => {
 };
 
 // PATCH email verification (update `isVerified`)
-exports.patch = async (req, res, next) => {
-  try {
-    const authData = jwt.verify(req.query.token, process.env.JWT_SECRET);
+exports.patch = asyncHandler(async (req, res, next) => {
+  // find user and update verification status
+  const user = await User.findByIdAndUpdate(
+    req.authData.user._id,
+    { isVerified: true }, // update
+    { new: true }, // options
+  ).exec();
 
-    // find user and update verification status
-    const user = await User.findByIdAndUpdate(
-      authData.user._id,
-      { isVerified: true }, // update
-      { new: true }, // options
-    ).exec();
+  if (!user) return next(createError(500, "Unable to verify user's account"));
 
-    // issue new JWT and user data as JSON
-    res.json({
-      success: true,
-      message: `User '${user.username}' is now verified`,
-      token: issueJwt(user),
-      data: user,
-    });
-  } catch (err) {
-    next(createError(403, 'Forbidden'));
-  }
-};
+  // issue new JWT and user data as JSON
+  res.json({
+    success: true,
+    message: `User '${user.username}' is now verified`,
+    token: issueJwt(user),
+    data: user,
+  });
+});
