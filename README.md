@@ -366,3 +366,4 @@ This project was built in order to practice implementing the following skills:
 - [Dotenv](https://www.npmjs.com/package/dotenv) – for keeping my database connection strings and JWT key secret
 - [He](https://www.npmjs.com/package/he) – for encoding HTML entities
 - [limax](https://github.com/lovell/limax) – for generating URL slugs
+- [Nodemailer](https://nodemailer.com/) - for sending emails
