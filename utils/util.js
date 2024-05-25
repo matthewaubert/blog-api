@@ -6,12 +6,17 @@ const limax = require('limax'); // https://github.com/lovell/limax
  * @param {object} user - JWT payload
  * @returns {string} JWT
  */
-exports.issueJwt = (user) =>
-  jwt.sign(
-    { user }, // payload
+exports.issueJwt = (user) => {
+  // remove password from payload
+  const { ...payload } = user.toObject();
+  delete payload.password;
+
+  return jwt.sign(
+    { user: payload }, // payload
     process.env.JWT_SECRET, // secret key
     { expiresIn: '24h' }, // options
   );
+};
 
 /**
  * convert input string to unique URL-friendly format,

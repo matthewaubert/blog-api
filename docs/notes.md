@@ -154,7 +154,20 @@ To do:
 ## 5/7/24
 
 To do:
-- [ ] Modify API endpoints to support querying resources by slug
+- [x] Modify API endpoints to support querying resources by slug
   - [x] First change `validateIdParam` middleware and related User, Post, and Category controllers
   - [x] Refactor `validateIdParam` to set `req.mongoDbQuery` obj. Then refactor related User, Post, and Category controllers.
   - [x] Refactor `validatePostIdParam` and `validateCommentIdParam` middlewares to set `req.mongoDbQuery. Then refactor related Comment controllers.
+
+## 5/24/24
+
+To do:
+- [x] Write verification POST controller to trigger sending an email
+
+## 5/25/25
+
+To do:
+- [x] Write verification PATCH controller to update `isVerified`
+- [x] Disallow changing `isVerified` in User PATCH endpoint
+- [x] Remove sensitive information from JWT payload
+- [x] Update documentation for `/api/verification` endpoint

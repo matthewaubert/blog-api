@@ -22,14 +22,16 @@ exports.verifyToken = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, authData) => {
     // if err: forbidden
-    if (err)
+    if (err) {
       return res.status(403).json({
         success: false,
         message: 'Forbidden',
         errors: [err],
       });
+    }
 
     // if no error: set authData
+    req.token = token;
     req.authData = authData;
     next();
   });
