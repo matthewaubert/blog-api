@@ -214,4 +214,7 @@ router.post('/login', loginController.post);
 // POST email verification (trigger sending an email)
 router.post('/verification', verifyToken, verificationController.post);
 
+// PATCH email verification (update `isVerified`)
+router.patch('/verification', verificationController.patch);
+
 module.exports = router;
