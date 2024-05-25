@@ -288,7 +288,8 @@ exports.patch = [
             case 'password':
               userFields.password = await bcrypt.hash(req.body.password, 10);
               break;
-            // do not allow client to change admin status
+            // do not allow client to change verification or admin status
+            case 'isVerified':
             case 'isAdmin':
               return next(createError(403, 'Forbidden'));
             default:
