@@ -170,4 +170,4 @@ To do:
 - [x] Write verification PATCH controller to update `isVerified`
 - [x] Disallow changing `isVerified` in User PATCH endpoint
 - [x] Remove sensitive information from JWT payload
-- [ ] Update documentation
+- [x] Update documentation for `/api/verification` endpoint

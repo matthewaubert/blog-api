@@ -82,7 +82,7 @@ You can obtain resources from the API using various means. For example:
   curl http://<domain-name>/api/posts
   ```
 
-### Obtain JWT via `login` Route
+### Obtain JWT via `login` endpoint
 
 Depending on the resource, you may need to attach a valid JSON web token (JWT) in the `Authorization` header of the request. e.g. `Authorization: Bearer <json-web-token>`
 
@@ -196,7 +196,9 @@ will return:
 
 Making a `PUT` request on an API endpoint with a resource ID or slug will fully replace the resource instance with the matching ID or slug, using the fields supplied in the `body` of the request, and then return the updated resource instance. You must update all fields.
 
-In the case of a Post or Comment resource, The user ID in the JWT payload sent in the `Authorization` header will be included in the resource's `user` field.
+In the case of a User resource instance, a new JWT will be issued in the successful response.
+
+In the case of a Post or Comment resource instance, The user ID in the JWT payload sent in the `Authorization` header will be included in the resource's `user` field.
 
 e.g. `PUT /api/posts/662ab91421be18d008e14500` with the following body
 ```json
@@ -228,6 +230,10 @@ will return:
 ### Partially update a resource instance
 
 Making a `PATCH` request on an API endpoint with a resource ID or slug will make a partial update on the resource instance with the matching ID or slug, using the fields supplied in the `body` of the request, and then return the updated resource instance. You may update any number of fields.
+
+In the case of a User resource instance, a new JWT will be issued in the successful response.
+
+You may not update a User resource instance's `isVerified` or `isAdmin` attributes in this way. `isVerified` can only be changed via the `/api/verification` endpoint.
 
 e.g. `PATCH /api/posts/662ab91421be18d008e14500` with the following body
 ```json
@@ -282,6 +288,14 @@ e.g. `DELETE /api/posts/662ab91421be18d008e14500` will return:
   }
 }
 ```
+
+### Verify a User resource instance via `verification` endpoint
+
+A User resource instance's `isVerified` can only be changed via the `/api/verification` endpoint.
+
+First, make a `POST` request to the `/api/verification` endpoint with a valid JWT in the `"Authorization"` header (this can be obtained via the `/api/login` endpoint, as detailed above). If successful, this will trigger a verification email with the JWT to be sent from "horizons-noreply@matthewaubert.com" to the email in the JWT payload. This email will provide instructions for the user.
+
+Next, make a `PATCH` request to the `/api/verification` endpoint with the same JWT in the `"Authorization"` header. If successful, the User resource instance's `isVerified` value will be changed to `true` and a new JWT will be issued in the response.
 
 ### Error Messages
 
