@@ -63,8 +63,8 @@ async function sendVerificationEmail(user, token) {
   console.log('Message sent:', info.messageId);
 }
 
-// GET email verification
-exports.get = async (req, res, next) => {
+// POST email verification (trigger sending an email)
+exports.post = async (req, res, next) => {
   const { user } = req.authData;
 
   try {

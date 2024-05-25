@@ -211,7 +211,7 @@ router.post('/login', loginController.post);
 
 /* Verify Email Routes */
 
-// GET email verification
-router.get('/verification', verifyToken, verificationController.get);
+// POST email verification (trigger sending an email)
+router.post('/verification', verifyToken, verificationController.post);
 
 module.exports = router;
