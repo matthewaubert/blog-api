@@ -20,6 +20,7 @@ const commentController = require('../controllers/comment-controller');
 const categoryController = require('../controllers/category-controller');
 const loginController = require('../controllers/login-controller');
 const verificationController = require('../controllers/verification-controller');
+const imageController = require('../controllers/image-controller');
 
 // API index
 router.get('/', (req, res) => {
@@ -216,5 +217,10 @@ router.post('/verification', verifyToken, verificationController.post);
 
 // PATCH email verification (update `isVerified`)
 router.patch('/verification', verifyToken, verificationController.patch);
+
+/* Image Routes */
+
+// POST image
+router.post('/images', imageController.post);
 
 module.exports = router;
