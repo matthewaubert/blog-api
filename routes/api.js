@@ -21,6 +21,7 @@ const categoryController = require('../controllers/category-controller');
 const loginController = require('../controllers/login-controller');
 const verificationController = require('../controllers/verification-controller');
 const imageController = require('../controllers/image-controller');
+const apiKeyController = require('../controllers/api-key-controller');
 
 // API index
 router.get('/', (req, res) => {
@@ -222,5 +223,15 @@ router.patch('/verification', verifyToken, verificationController.patch);
 
 // POST image
 router.post('/images', imageController.post);
+
+/* API Keys Routes */
+
+// GET TinyMCE API key
+router.get(
+  '/api-keys/tinymce',
+  verifyToken,
+  isVerified,
+  apiKeyController.tinymceGet,
+);
 
 module.exports = router;
