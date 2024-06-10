@@ -1,6 +1,6 @@
 require('dotenv').config();
 const createError = require('http-errors'); // https://www.npmjs.com/package/http-errors
-const express = require('express');
+const express = require('express'); // https://expressjs.com/en/api.html
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -38,7 +38,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(compression()); // compress all routes
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5173'
+        : 'http://horizons-ma.pages.dev',
+  }),
+);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
