@@ -227,11 +227,6 @@ router.post('/images', imageController.post);
 /* API Keys Routes */
 
 // GET TinyMCE API key
-router.get(
-  '/api-keys/tinymce',
-  verifyToken,
-  isVerified,
-  apiKeyController.tinymceGet,
-);
+router.get('/api-keys/tinymce', apiKeyController.tinymceGet);
 
 module.exports = router;
