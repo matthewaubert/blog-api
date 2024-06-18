@@ -95,22 +95,15 @@ const validationChainPostPut = [
     // check that `tags` is an array of strings
     .isArray()
     .customSanitizer((values) => values.map((value) => encode(value))),
-  body('displayImg')
+  body('displayImgUrl').optional().trim(),
+  body('displayImgAttribution')
     .optional()
-    .isObject()
-    .customSanitizer((value) => {
-      const displayImg = {};
-      if (value.url) {
-        displayImg.url = value.url.trim();
-      }
-      if (value.attribution) {
-        displayImg.attribution = encode(value.attribution.trim());
-      }
-      if (value.source) {
-        displayImg.source = encode(value.source.trim());
-      }
-      return displayImg;
-    }),
+    .trim()
+    .customSanitizer((value) => encode(value)),
+  body('displayImgSource')
+    .optional()
+    .trim()
+    .customSanitizer((value) => encode(value)),
 ];
 
 // POST (create) a new Post
@@ -137,9 +130,9 @@ exports.post = [
       category: req.body.category,
       tags: req.body.tags,
       displayImg: {
-        url: req.body.displayImg?.url,
-        attribution: req.body.displayImg?.attribution,
-        source: req.body.displayImg?.source,
+        url: req.body.displayImgUrl,
+        attribution: req.body.displayImgAttribution,
+        source: req.body.displayImgSource,
       },
     });
 

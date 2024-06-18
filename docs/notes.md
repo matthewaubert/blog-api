@@ -171,3 +171,9 @@ To do:
 - [x] Disallow changing `isVerified` in User PATCH endpoint
 - [x] Remove sensitive information from JWT payload
 - [x] Update documentation for `/api/verification` endpoint
+
+## 6/8/24
+
+To do:
+- [x] Configure Multer and Cloudinary
+- [ ] Set up image controller for TinyMCE
