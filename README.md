@@ -16,11 +16,12 @@ A RESTful API utilizing JWT authentication to power a blogging platform.
 
 ## Resources
 
-There are 4 resources in this API:
+There are 5 resources in this API:
 - Users
 - Posts
 - Comments
 - Categories
+- Images
 
 ### User fields
 
@@ -297,6 +298,20 @@ First, make a `POST` request to the `/api/verification` endpoint with a valid JW
 
 Next, make a `PATCH` request to the `/api/verification` endpoint with the same JWT in the `"Authorization"` header. If successful, the User resource instance's `isVerified` value will be changed to `true` and a new JWT will be issued in the response.
 
+### `POST` images via `images` endpoint
+
+Make a `POST` request to the `/api/images` endpoint in order to upload an image to Cloudinary and get back its URL.
+
+In order to properly send the image to the endpoint, attach it as `multipart/form-data` to the body of the request.
+
+If successful, the endpoint will return the URL as JSON in the following format:
+
+```json
+{
+  "location": "https://res.cloudinary.com/example-image-1717548198432.jpg"
+}
+```
+
 ### Error Messages
 
 All responses include a `"success"` field – a boolean value to tell you whether the request succeeded – and `"message"` field – a string providing you more information about the request. Most failed requests will also provide an `"error"` field – an array of objects describing the error(s).
@@ -360,10 +375,16 @@ This project was built in order to practice implementing the following skills:
 
 - [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) – an implementation of JSON web tokens for Node.js
 - [bcryptjs](https://www.npmjs.com/package/bcryptjs) – for securing passwords by hashing and salting
+- [Cloudinary](https://cloudinary.com/documentation/node_quickstart) - for uploading images to Cloudinary's cloud storage
+- [compression](https://www.npmjs.com/package/compression) - Node.js compression middleware
 - [express-async-handler](https://www.npmjs.com/package/express-async-handler) – asynchronous exception-handling middleware for Express
+- [express-rate-limit](https://express-rate-limit.mintlify.app/) – rate-limiting middleware for Express
 - [express-validator](https://www.npmjs.com/package/express-validator) – user input validation middleware for Express
 - [http-errors](https://www.npmjs.com/package/http-errors) – for creating HTTP errors for Express
 - [Dotenv](https://www.npmjs.com/package/dotenv) – for keeping my database connection strings and JWT key secret
 - [He](https://www.npmjs.com/package/he) – for encoding HTML entities
+- [helmet.js](https://helmetjs.github.io/) - Express middleware to protect from well-known web vulnerabilities
+- [http-errors](https://www.npmjs.com/package/http-errors) - for creating HTTP errors
 - [limax](https://github.com/lovell/limax) – for generating URL slugs
+- [Multer](https://github.com/expressjs/multer) - Node.js middleware for handling `multipart/form-data`
 - [Nodemailer](https://nodemailer.com/) - for sending emails
