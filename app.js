@@ -43,7 +43,7 @@ app.use(
     origin:
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:5173'
-        : 'http://horizons-ma.pages.dev',
+        : 'https://horizons-ma.pages.dev',
   }),
 );
 
