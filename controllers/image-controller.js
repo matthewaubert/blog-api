@@ -16,7 +16,7 @@ exports.post = [
   //   size: 97273,
   // };
   asyncHandler(async (req, res) => {
-    console.log('req.file:', req.file);
+    // console.log('req.file:', req.file);
 
     let imgId; // will be set to Cloudinary `public_id` or `null`
     // if user uploaded an image:
