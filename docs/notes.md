@@ -182,3 +182,4 @@ To do:
 
 To do:
 - [x] Refactor Post `getAll` to filter by user and category
+- [x] Handle nesting Post `displayImg` fields
