@@ -9,15 +9,48 @@ const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
 
 // GET all Posts
-exports.getAll = asyncHandler(async (req, res) => {
+exports.getAll = asyncHandler(async (req, res, next) => {
   // if client sorts by `id`, replace property name with `_id` to work with MongoDB
   if (req.query.sort && Object.keys(req.query.sort).includes('id')) {
     req.query.sort._id = req.query.sort.id;
     delete req.query.sort.id;
   }
 
+  // init filter obj for query
+  const filter = {};
+
+  if (req.query.userId) {
+    filter.user = req.query.userId;
+  }
+  if (req.query.userSlug) {
+    const user = await User.findOne({ slug: req.query.userSlug }).exec();
+    if (user) {
+      filter.user = user._id;
+    } else {
+      // if no user is found with the slug, throw error
+      return next(createError(404, `User '${req.query.userSlug}' not found`));
+    }
+  }
+
+  if (req.query.categoryId) {
+    filter.category = req.query.categoryId;
+  }
+  if (req.query.categorySlug) {
+    const category = await Category.findOne({
+      slug: req.query.categorySlug,
+    }).exec();
+    if (category) {
+      filter.category = category._id;
+    } else {
+      // if no category is found with the slug, throw error
+      return next(
+        createError(404, `Category '${req.query.categorySlug}' not found`),
+      );
+    }
+  }
+
   // get all Posts
-  const allPosts = await Post.find()
+  const allPosts = await Post.find(filter)
     // default sort by `_id` asc
     .sort(req.query.sort ? req.query.sort : { _id: 'asc' })
     .skip(req.query.offset)
