@@ -8,16 +8,67 @@ const { body, validationResult } = require('express-validator'); // https://expr
 const { encode } = require('he'); // https://www.npmjs.com/package/he
 const { slugify } = require('../utils/util');
 
+// middleware to nest `displayImg` fields that come in flattened in the request body
+function nestDisplayImgFields(req, res, next) {
+  const { displayImgUrl, displayImgAttribution, displayImgSource } = req.body;
+  if (displayImgUrl || displayImgAttribution || displayImgSource) {
+    req.body.displayImg = {
+      ...(displayImgUrl && { url: displayImgUrl }),
+      ...(displayImgAttribution && { attribution: displayImgAttribution }),
+      ...(displayImgSource && { source: displayImgSource }),
+    };
+
+    delete req.body.displayImgUrl;
+    delete req.body.displayImgAttribution;
+    delete req.body.displayImgSource;
+  }
+
+  next();
+}
+
 // GET all Posts
-exports.getAll = asyncHandler(async (req, res) => {
+exports.getAll = asyncHandler(async (req, res, next) => {
   // if client sorts by `id`, replace property name with `_id` to work with MongoDB
   if (req.query.sort && Object.keys(req.query.sort).includes('id')) {
     req.query.sort._id = req.query.sort.id;
     delete req.query.sort.id;
   }
 
+  // init filter obj for query
+  const filter = {};
+
+  if (req.query.userId) {
+    filter.user = req.query.userId;
+  }
+  if (req.query.userSlug) {
+    const user = await User.findOne({ slug: req.query.userSlug }).exec();
+    if (user) {
+      filter.user = user._id;
+    } else {
+      // if no user is found with the slug, throw error
+      return next(createError(404, `User '${req.query.userSlug}' not found`));
+    }
+  }
+
+  if (req.query.categoryId) {
+    filter.category = req.query.categoryId;
+  }
+  if (req.query.categorySlug) {
+    const category = await Category.findOne({
+      slug: req.query.categorySlug,
+    }).exec();
+    if (category) {
+      filter.category = category._id;
+    } else {
+      // if no category is found with the slug, throw error
+      return next(
+        createError(404, `Category '${req.query.categorySlug}' not found`),
+      );
+    }
+  }
+
   // get all Posts
-  const allPosts = await Post.find()
+  const allPosts = await Post.find(filter)
     // default sort by `_id` asc
     .sort(req.query.sort ? req.query.sort : { _id: 'asc' })
     .skip(req.query.offset)
@@ -111,6 +162,8 @@ exports.post = [
   // validate and sanitize Post fields
   ...validationChainPostPut,
 
+  nestDisplayImgFields,
+
   asyncHandler(async (req, res) => {
     // extract validation errors from request
     const errors = validationResult(req);
@@ -130,9 +183,9 @@ exports.post = [
       category: req.body.category,
       tags: req.body.tags,
       displayImg: {
-        url: req.body.displayImgUrl,
-        attribution: req.body.displayImgAttribution,
-        source: req.body.displayImgSource,
+        url: req.body.displayImg?.url,
+        attribution: req.body.displayImg?.attribution,
+        source: req.body.displayImg?.source,
       },
     });
 
@@ -161,6 +214,8 @@ exports.post = [
 exports.put = [
   // validate and sanitize Post fields
   ...validationChainPostPut,
+
+  nestDisplayImgFields,
 
   asyncHandler(async (req, res) => {
     // extract validation errors from request
@@ -260,22 +315,17 @@ exports.patch = [
     // check that `tags` is an array of strings
     .isArray()
     .customSanitizer((values) => values.map((value) => encode(value))),
-  body('displayImg')
+  body('displayImgUrl').optional().trim(),
+  body('displayImgAttribution')
     .optional()
-    .isObject()
-    .customSanitizer((value) => {
-      const displayImg = {};
-      if (value.url) {
-        displayImg.url = value.url.trim();
-      }
-      if (value.attribution) {
-        displayImg.attribution = encode(value.attribution.trim());
-      }
-      if (value.source) {
-        displayImg.source = encode(value.source.trim());
-      }
-      return displayImg;
-    }),
+    .trim()
+    .customSanitizer((value) => encode(value)),
+  body('displayImgSource')
+    .optional()
+    .trim()
+    .customSanitizer((value) => encode(value)),
+
+  nestDisplayImgFields,
 
   asyncHandler(async (req, res) => {
     // extract validation errors from request
@@ -311,17 +361,12 @@ exports.patch = [
               if (req.authData.user.isAdmin) postFields.user = req.body.user;
               break;
             case 'displayImg': {
-              const { displayImg } = req.body;
-              postFields.displayImg = {};
-              if (displayImg.url) {
-                postFields.displayImg.url = displayImg.url;
-              }
-              if (displayImg.attribution) {
-                postFields.displayImg.attribution = displayImg.attribution;
-              }
-              if (displayImg.source) {
-                postFields.displayImg.source = displayImg.source;
-              }
+              const { url, attribution, source } = req.body.displayImg;
+              postFields.displayImg = {
+                ...(url && { url }),
+                ...(attribution && { attribution }),
+                ...(source && { source }),
+              };
               break;
             }
             default:

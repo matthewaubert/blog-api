@@ -176,4 +176,10 @@ To do:
 
 To do:
 - [x] Configure Multer and Cloudinary
-- [ ] Set up image controller for TinyMCE
+- [x] Set up image controller for TinyMCE
+
+## 7/6/24
+
+To do:
+- [x] Refactor Post `getAll` to filter by user and category
+- [x] Handle nesting Post `displayImg` fields
